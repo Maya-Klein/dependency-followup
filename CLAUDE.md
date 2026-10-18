@@ -4,19 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Planning stage: the repo currently holds only `docs/spec.md` (Hebrew product spec), `docs/plan.md` (approved staged implementation plan) and a Word copy of the spec. There is no code, no git repo and no build/test tooling yet. Read `docs/plan.md` before starting any work; it defines 7 stages and each stage's tests. Work one stage at a time, starting with stage 1 (spec "Gate 1": a feasibility check that saves a deadline and shows it in a colour by days remaining). Stage 2 is a Stitch design of the gate-1 page (a course requirement). Keep anything outside the MVP in the "בהמשך" list in `docs/plan.md`.
+Stage 1 (spec "Gate 1": save a deadline and show it in a colour by days remaining) is implemented on branch `feature/gate-1`; the docs are `docs/spec.md` (Hebrew product spec) and `docs/plan.md` (approved staged plan, 7 stages, each with its tests). Read `docs/plan.md` before starting any work and work one stage at a time. Stage 2 is a Stitch design of the gate-1 page (a course requirement). Keep anything outside the MVP in the "בהמשך" list in `docs/plan.md`.
 
 The docs are in Hebrew, and the UI is Hebrew with `dir="rtl"`.
 
-## Commands (planned, not yet created)
+## Commands
 
-Stack: Python, Flask + Jinja2, SQLAlchemy Core on SQLite, pytest.
+Stack: Python, Flask + Jinja2, SQLAlchemy Core on SQLite, pytest. Use the local venv (`.venv`, git-ignored); setup: `python -m venv .venv`, then `.venv\Scripts\python -m pip install -r requirements.txt`.
 
-- Run the app: `python run.py`
-- Run all tests: `pytest`
-- Run one test: `pytest tests/test_deadlines.py::test_name`
+- Run the app: `.venv\Scripts\python run.py` (http://127.0.0.1:5000)
+- Run all tests: `.venv\Scripts\python -m pytest`
+- Run one test: `.venv\Scripts\python -m pytest tests/test_deadlines.py::test_name`
 
-Update this section once the real tooling exists.
+`pytest.ini` sets `pythonpath = .`, so tests import `app` directly. The web tests pin "today" by monkeypatching `app.web.routes.today_in_israel`.
 
 ## Architecture
 
