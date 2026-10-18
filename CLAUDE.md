@@ -8,6 +8,10 @@ Stage 1 (spec "Gate 1": save a deadline and show it in a colour by days remainin
 
 The docs are in Hebrew, and the UI is Hebrew with `dir="rtl"`.
 
+Repository: https://github.com/Maya-Klein/dependency-followup (public). Feature work goes through pull requests from a feature branch into `main`.
+
+Obsidian work log: a `Stop` hook (`.claude/settings.json` → `.claude/hooks/log_task.py`) is active. At the end of each turn it appends a short entry (branch, last commit, summary of the last message) to `dependency-followup/יומן עבודה.md` in the vault. It never fails the session. Detailed per-task entries (decisions, open issues, next step) are still written by hand.
+
 ## Commands
 
 Stack: Python, Flask + Jinja2, SQLAlchemy Core on SQLite, pytest. Use the local venv (`.venv`, git-ignored); setup: `python -m venv .venv`, then `.venv\Scripts\python -m pip install -r requirements.txt`.
