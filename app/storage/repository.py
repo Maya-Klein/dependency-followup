@@ -5,10 +5,15 @@ from sqlalchemy import insert, select
 from app.storage.db import topics
 
 
+MAX_TITLE_LENGTH = 200
+
+
 def add_topic(engine, title, due_date):
     title = (title or "").strip()
     if not title:
         raise ValueError("title must not be blank")
+    if len(title) > MAX_TITLE_LENGTH:
+        raise ValueError("title too long")
     with engine.begin() as conn:
         result = conn.execute(
             insert(topics).values(

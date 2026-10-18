@@ -70,6 +70,18 @@ def test_blank_title_rejected(client, app, title):
     assert list_topics(app.config["ENGINE"]) == []
 
 
+def test_too_long_title_rejected(client, app):
+    resp = post(client, "x" * 201, "2026-10-28")
+
+    assert resp.status_code == 400
+    assert "הכותרת ארוכה מדי" in resp.get_data(as_text=True)
+    assert list_topics(app.config["ENGINE"]) == []
+
+
+def test_form_has_maxlength(client):
+    assert 'maxlength="200"' in client.get("/").get_data(as_text=True)
+
+
 @pytest.mark.parametrize("due", ["", "2026-02-30", "abc"])
 def test_invalid_date_rejected(client, app, due):
     resp = post(client, "x", due)

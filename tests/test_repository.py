@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 
 from app.storage.db import get_engine
-from app.storage.repository import add_topic, list_topics
+from app.storage.repository import MAX_TITLE_LENGTH, add_topic, list_topics
 
 
 def test_saved_topic_survives_new_connection(db_url):
@@ -22,6 +22,14 @@ def test_blank_title_rejected_and_nothing_saved(engine, title):
         add_topic(engine, title, date(2026, 11, 3))
 
     assert list_topics(engine) == []
+
+
+def test_title_length_limit(engine):
+    add_topic(engine, "x" * MAX_TITLE_LENGTH, date(2026, 11, 3))
+    with pytest.raises(ValueError):
+        add_topic(engine, "x" * (MAX_TITLE_LENGTH + 1), date(2026, 11, 3))
+
+    assert len(list_topics(engine)) == 1
 
 
 def test_title_is_trimmed(engine):
