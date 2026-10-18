@@ -1,0 +1,22 @@
+body { font-family: system-ui, "Segoe UI", Arial, sans-serif; margin: 0; background: #fafafa; color: #222; }
+main { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+form { display: grid; gap: .75rem; margin-bottom: 1.5rem; }
+label { display: grid; gap: .25rem; }
+input, button { font: inherit; padding: .5rem; }
+.error { color: #b00020; margin: 0; }
+
+.topics { list-style: none; padding: 0; display: grid; gap: .5rem; }
+.topics li { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; padding: .75rem; border-inline-start: 6px solid; background: #fff; }
+.topics .title { flex: 1 1 10rem; font-weight: 600; overflow-wrap: anywhere; }
+.badge { padding: .1rem .6rem; border-radius: 1rem; font-weight: 600; }
+
+.level-far { border-color: #2e7d32; }
+.level-far .badge { background: #e8f5e9; color: #1b5e20; }
+.level-approaching { border-color: #f9a825; }
+.level-approaching .badge { background: #fff8e1; color: #7a5200; }
+.level-tomorrow { border-color: #ef6c00; }
+.level-tomorrow .badge { background: #fff3e0; color: #8a3b00; }
+.level-today { border-color: #d84315; }
+.level-today .badge { background: #fbe9e7; color: #8a2000; }
+.level-overdue { border-color: #b71c1c; }
+.level-overdue .badge { background: #b71c1c; color: #fff; }
