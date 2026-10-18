@@ -39,7 +39,17 @@ def test_valid_post_redirects_and_topic_is_listed(client):
     html = client.get("/").get_data(as_text=True)
     assert "תשובה מהספק" in html
     assert "level-far" in html
-    assert "בעוד <bdi>10</bdi> ימים" in html
+    assert '<bdi class="days">בעוד 10 ימים</bdi>' in html
+
+
+@pytest.mark.parametrize(
+    "offset, text",
+    [(1, "בעוד יום אחד"), (2, "בעוד יומיים"), (0, "היום"), (-1, "לפני יום אחד"), (-2, "לפני יומיים")],
+)
+def test_days_text_rendered_in_page(client, offset, text):
+    post(client, "x", (TODAY + timedelta(days=offset)).isoformat())
+
+    assert f'<bdi class="days">{text}</bdi>' in client.get("/").get_data(as_text=True)
 
 
 @pytest.mark.parametrize(

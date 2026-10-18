@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 
 import pytest
 
-from app.core.deadlines import days_remaining, today_in_israel, urgency_level
+from app.core.deadlines import days_remaining, days_text, today_in_israel, urgency_level
 
 
 @pytest.mark.parametrize(
@@ -36,6 +36,24 @@ def test_urgency_level(days, level):
 )
 def test_days_remaining(today, due, expected):
     assert days_remaining(due, today) == expected
+
+
+@pytest.mark.parametrize(
+    "days, text",
+    [
+        (30, "בעוד 30 ימים"),
+        (3, "בעוד 3 ימים"),
+        (2, "בעוד יומיים"),
+        (1, "בעוד יום אחד"),
+        (0, "היום"),
+        (-1, "לפני יום אחד"),
+        (-2, "לפני יומיים"),
+        (-3, "לפני 3 ימים"),
+        (-30, "לפני 30 ימים"),
+    ],
+)
+def test_days_text(days, text):
+    assert days_text(days) == text
 
 
 def test_today_in_israel_after_utc_evening_is_next_day():

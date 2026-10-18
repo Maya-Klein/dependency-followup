@@ -32,6 +32,20 @@ def days_remaining(due, today):
     return (due - today).days
 
 
+def days_text(days):
+    """Hebrew phrase for days remaining, with the singular and dual forms."""
+    if days == 0:
+        return "היום"
+    count = abs(days)
+    if count == 1:
+        span = "יום אחד"
+    elif count == 2:
+        span = "יומיים"
+    else:
+        span = f"{count} ימים"
+    return f"בעוד {span}" if days > 0 else f"לפני {span}"
+
+
 def urgency_level(days):
     if days >= FAR_MIN_DAYS:
         return FAR

@@ -19,9 +19,7 @@
   <li class="level-{{ t.level }}">
     <span class="title">{{ t.title }}</span>
     <bdi class="due">{{ t.due_date.strftime('%d/%m/%Y') }}</bdi>
-    <span class="days">
-      {% if t.days < 0 %}לפני <bdi>{{ -t.days }}</bdi> ימים{% elif t.days == 0 %}היום{% else %}בעוד <bdi>{{ t.days }}</bdi> ימים{% endif %}
-    </span>
+    <bdi class="days">{{ t.days_text }}</bdi>
     <span class="badge">{{ t.label }}</span>
   </li>
   {% endfor %}

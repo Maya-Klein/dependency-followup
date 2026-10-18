@@ -2,7 +2,7 @@ from datetime import date
 
 from flask import Blueprint, current_app, redirect, render_template, request, url_for
 
-from app.core.deadlines import LEVEL_LABELS, days_remaining, today_in_israel, urgency_level
+from app.core.deadlines import LEVEL_LABELS, days_remaining, days_text, today_in_israel, urgency_level
 from app.storage.repository import MAX_TITLE_LENGTH, add_topic, list_topics
 
 bp = Blueprint("main", __name__)
@@ -14,7 +14,14 @@ def _render_index(status=200, error=None, title="", due=""):
     for topic in list_topics(current_app.config["ENGINE"]):
         days = days_remaining(topic["due_date"], today)
         level = urgency_level(days)
-        items.append({**topic, "days": days, "level": level, "label": LEVEL_LABELS[level]})
+        items.append(
+            {
+                **topic,
+                "days_text": days_text(days),
+                "level": level,
+                "label": LEVEL_LABELS[level],
+            }
+        )
     html = render_template(
         "index.html",
         items=items,
