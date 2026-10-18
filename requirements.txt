@@ -1,0 +1,4 @@
+flask
+sqlalchemy>=2
+tzdata
+pytest
