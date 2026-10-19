@@ -54,6 +54,6 @@ def create():
     try:
         add_topic(current_app.config["ENGINE"], title, due_date)
     except ValueError:
-        return _render_index(400, "יש להזין כותרת.", title, due)
+        return _render_index(400, "יש להזין כותרת", title, due)
 
     return redirect(url_for("main.index"), code=303)

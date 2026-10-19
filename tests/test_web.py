@@ -44,7 +44,7 @@ def test_valid_post_redirects_and_topic_is_listed(client):
 
 @pytest.mark.parametrize(
     "offset, text",
-    [(1, "בעוד יום אחד"), (2, "בעוד יומיים"), (0, "היום"), (-1, "לפני יום אחד"), (-2, "לפני יומיים")],
+    [(1, "בעוד יום"), (2, "בעוד יומיים"), (0, "היום"), (-1, "לפני יום"), (-2, "לפני יומיים")],
 )
 def test_days_text_rendered_in_page(client, offset, text):
     post(client, "x", (TODAY + timedelta(days=offset)).isoformat())
@@ -55,7 +55,7 @@ def test_days_text_rendered_in_page(client, offset, text):
 @pytest.mark.parametrize(
     "offset, level, label",
     [
-        (10, "far", "רחוק"),
+        (10, "far", "בהמשך"),
         (3, "approaching", "מתקרב"),
         (1, "tomorrow", "מחר"),
         (0, "today", "היום"),
