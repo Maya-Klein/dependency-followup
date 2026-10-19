@@ -140,6 +140,8 @@ The initial design from Stitch was the starting point. In the implementation I c
 - **Security review:** after every stage (injection, input, secrets, information exposure). Findings are reported and fixed only with approval.
 - **Git:** a new branch for every feature, never a direct commit to `main`, and a commit after every completed action.
 - **Obsidian:** a work log in the vault, in the `dependency-followup` folder. A `Stop` hook (`.claude/settings.json` and `.claude/hooks/log_task.py`) adds a short entry at the end of each round with the branch, commit and a summary. Detailed entries (decisions, open issues, next step) are written by hand.
+- **Test hook:** another `Stop` hook (`.claude/hooks/run_tests.py`, registered in `.claude/settings.json`) runs the whole pytest suite at the end of each round, but only if `py`, `html` or `css` files changed since the last green run. A docs-only change does not run the tests. When a test fails, the hook blocks the end of the round and feeds the error back, and it must be fixed before continuing.
+- **Stop and alert after 3 failures:** on the third consecutive failure the hook stops blocking and raises an alert: a warning sound different from the usual one, a Windows dialog, a Hebrew message and an entry in the Obsidian log. The alert fires once, and a green run resets the count. The last-run state and the count are kept in `data/.last_tested` and `data/.test_failures` (not committed to git).
 - **GitHub CLI (`gh`):** opening and merging pull requests from the terminal.
 - **Stitch MCP:** creating the design and the design system directly from Claude Code.
 - **Obsidian MCP:** reading and writing the vault from within the session.
