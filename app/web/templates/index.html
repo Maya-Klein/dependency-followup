@@ -26,6 +26,7 @@
 
   <details class="add"{% if error %} open{% endif %}>
     <summary>+ הוספת נושא</summary>
+    <h2 class="form-title">הוספת נושא</h2>
     <form method="post" action="{{ url_for('main.create') }}">
       {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
       <label>כותרת

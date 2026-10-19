@@ -46,10 +46,10 @@ def create():
     try:
         due_date = date.fromisoformat(due)
     except ValueError:
-        return _render_index(400, "יש להזין תאריך תקין.", title, due)
+        return _render_index(400, "יש להזין תאריך תקין", title, due)
 
     if len(title.strip()) > MAX_TITLE_LENGTH:
-        return _render_index(400, f"הכותרת ארוכה מדי (עד {MAX_TITLE_LENGTH} תווים).", title, due)
+        return _render_index(400, f"הכותרת ארוכה מדי (עד {MAX_TITLE_LENGTH} תווים)", title, due)
 
     try:
         add_topic(current_app.config["ENGINE"], title, due_date)

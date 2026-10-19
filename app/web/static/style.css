@@ -14,6 +14,8 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 16px; }
 .add > summary::-webkit-details-marker { display: none; }
 .add > summary:hover { background: var(--primary-hover); }
 .add[open] > summary { margin-bottom: 12px; }
+/* Desktop-only heading above the form; on mobile the summary button plays this role */
+.form-title { display: none; font-size: 17px; font-weight: 600; margin: 0 0 12px; }
 form { display: grid; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
 label { display: grid; gap: 4px; font-weight: 500; }
 input { font: inherit; min-height: 48px; padding: 0 12px; border: 1px solid var(--field); border-radius: 8px; background: #fff; }
@@ -48,5 +50,6 @@ button:hover { background: var(--primary-hover); }
   main { max-width: 68rem; padding-top: 40px; }
   .layout { grid-template-columns: minmax(0, 1fr) 20rem; align-items: start; gap: 32px; }
   .add > summary { display: none; }
+  .form-title { display: block; }
   .add::details-content { content-visibility: visible; display: block; }
 }
