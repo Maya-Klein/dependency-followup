@@ -14,7 +14,7 @@ TODAY = "today"
 OVERDUE = "overdue"
 
 LEVEL_LABELS = {
-    FAR: "רחוק",
+    FAR: "בהמשך",
     APPROACHING: "מתקרב",
     TOMORROW: "מחר",
     TODAY: "היום",
@@ -38,7 +38,7 @@ def days_text(days):
         return "היום"
     count = abs(days)
     if count == 1:
-        span = "יום אחד"
+        span = "יום"
     elif count == 2:
         span = "יומיים"
     else:

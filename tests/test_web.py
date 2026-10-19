@@ -44,7 +44,7 @@ def test_valid_post_redirects_and_topic_is_listed(client):
 
 @pytest.mark.parametrize(
     "offset, text",
-    [(1, "בעוד יום אחד"), (2, "בעוד יומיים"), (0, "היום"), (-1, "לפני יום אחד"), (-2, "לפני יומיים")],
+    [(1, "בעוד יום"), (2, "בעוד יומיים"), (0, "היום"), (-1, "לפני יום"), (-2, "לפני יומיים")],
 )
 def test_days_text_rendered_in_page(client, offset, text):
     post(client, "x", (TODAY + timedelta(days=offset)).isoformat())
@@ -55,7 +55,7 @@ def test_days_text_rendered_in_page(client, offset, text):
 @pytest.mark.parametrize(
     "offset, level, label",
     [
-        (10, "far", "רחוק"),
+        (10, "far", "בהמשך"),
         (3, "approaching", "מתקרב"),
         (1, "tomorrow", "מחר"),
         (0, "today", "היום"),
@@ -121,3 +121,23 @@ def test_html_title_is_escaped(client, title, live, escaped):
 
     assert escaped in html
     assert live not in html
+
+
+def test_fresh_page_has_no_error_and_form_is_closed(client):
+    html = client.get("/").get_data(as_text=True)
+
+    assert 'role="alert"' not in html
+    assert 'class="error"' not in html
+    assert '<details class="add">' in html
+
+
+@pytest.mark.parametrize(
+    "title, due",
+    [("", "2026-10-28"), ("x" * 201, "2026-10-28"), ("x", "abc")],
+)
+def test_rejected_post_opens_form_and_error_has_no_trailing_period(client, title, due):
+    html = post(client, title, due).get_data(as_text=True)
+
+    assert '<details class="add" open>' in html
+    error = html.split('role="alert">')[1].split("</p>")[0]
+    assert error and not error.endswith(".")
