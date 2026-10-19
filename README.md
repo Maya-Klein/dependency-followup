@@ -130,4 +130,4 @@ python -m venv .venv
 - **GitHub CLI (`gh`):** פתיחה ומיזוג של pull requests מהטרמינל.
 - **Stitch MCP:** יצירת העיצוב ו-design system ישירות מ-Claude Code.
 - **Obsidian MCP:** קריאה וכתיבה בכספת מתוך הסשן.
-- **סקילים מותקנים:** `karpathy-guidelines` ו-`ponytail` (שינויים קטנים וממוקדים, ופירוט `ponytail-audit`, `ponytail-review`, `ponytail-debt`), וכן סקילי `hyperframes` ליצירת וידאו (`hyperframes-*`, `motion-graphics`, `product-launch-video`, `pr-to-video`, `slideshow` ועוד), שלא נדרשו בפרויקט עצמו. סקילים מובנים: `security-review` (שימש אחרי שלב 1), `code-review` ו-`simplify` (זמינים).
+- סקילים שהשתמשתי בהם: security-review
