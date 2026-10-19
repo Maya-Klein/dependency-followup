@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Stage 1 (spec "Gate 1": save a deadline and show it in a colour by days remaining) is implemented on branch `feature/gate-1`; the docs are `docs/spec.md` (Hebrew product spec) and `docs/plan.md` (approved staged plan, 7 stages, each with its tests). Read `docs/plan.md` before starting any work and work one stage at a time. Stage 2 is a Stitch design of the gate-1 page (a course requirement). Keep anything outside the MVP in the "בהמשך" list in `docs/plan.md`.
+Stage 1 (spec "Gate 1": save a deadline and show it in a colour by days remaining) is done and merged to `main` (PR #1). The current branch is `feature/stitch-design` (stage 2). The docs are `docs/spec.md` (Hebrew product spec) and `docs/plan.md` (approved staged plan, 7 stages, each with its tests). The final mobile design is in `docs/design/mobile-final.png`. Read `docs/plan.md` before starting any work and work one stage at a time. Stage 2 is a Stitch design of the gate-1 page (a course requirement), the Stitch project is "מעקב תלויות – שער 1 (סופי)". Keep anything outside the MVP in the "בהמשך" list in `docs/plan.md`.
 
 The docs are in Hebrew, and the UI is Hebrew with `dir="rtl"`.
 
@@ -40,7 +40,7 @@ The stage-2 Stitch redesign must replace only `web/templates/` and `web/static/`
 - **Escaping:** user text (titles, updates, later AI quotes) is rendered through Jinja2 autoescaping. Never use `|safe` on user input. A title containing HTML must be shown as text, and stage 1 has a test for it. A blank title is rejected.
 - **Update history is append-only.** Each update or thread is its own dated record and nothing is overwritten. A user-entered summary must be marked as a summary, not a quote. The AI analyses one pasted thread as a whole and does not compare records.
 - **No AI component before stage 6.** The model has not been chosen yet.
-- **`data/` is git-ignored** (the local SQLite file). In stage 1, add `.gitignore` and run `git init`. Early schema changes may be handled by deleting the local DB.
+- **`data/` is git-ignored** (the local SQLite file). Early schema changes may be handled by deleting the local DB.
 
 ## כללי עבודה
 
