@@ -2,29 +2,40 @@
 {% block content %}
 <h1>נושאים במעקב</h1>
 
-<form method="post" action="{{ url_for('main.create') }}">
-  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
-  <label>כותרת
-    <input type="text" name="title" value="{{ title }}" maxlength="{{ max_title }}" required>
-  </label>
-  <label>מועד יעד
-    <input type="date" name="due_date" value="{{ due }}" required>
-  </label>
-  <button type="submit">שמירה</button>
-</form>
+<div class="layout">
+  {% if items %}
+  <ul class="topics">
+    {% for t in items %}
+    <li class="level-{{ t.level }}">
+      <span class="title">{{ t.title }}</span>
+      <div class="meta">
+        <bdi class="due">{{ t.due_date.strftime('%d/%m/%Y') }}</bdi>
+        <bdi class="days">{{ t.days_text }}</bdi>
+        <span class="pill">
+          {%- if t.level == 'today' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          {%- elif t.level == 'overdue' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 21h20L12 3Z"/><path d="M12 10v5M12 18v.5"/></svg>{% endif -%}
+          <span class="badge">{{ t.label }}</span>
+        </span>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">אין נושאים עדיין.</p>
+  {% endif %}
 
-{% if items %}
-<ul class="topics">
-  {% for t in items %}
-  <li class="level-{{ t.level }}">
-    <span class="title">{{ t.title }}</span>
-    <bdi class="due">{{ t.due_date.strftime('%d/%m/%Y') }}</bdi>
-    <bdi class="days">{{ t.days_text }}</bdi>
-    <span class="badge">{{ t.label }}</span>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>אין נושאים עדיין.</p>
-{% endif %}
+  <details class="add"{% if error %} open{% endif %}>
+    <summary>+ הוספת נושא</summary>
+    <form method="post" action="{{ url_for('main.create') }}">
+      {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+      <label>כותרת
+        <input type="text" name="title" value="{{ title }}" maxlength="{{ max_title }}" required>
+      </label>
+      <label>מועד יעד
+        <input type="date" name="due_date" value="{{ due }}" required>
+      </label>
+      <button type="submit">שמירה</button>
+    </form>
+  </details>
+</div>
 {% endblock %}
