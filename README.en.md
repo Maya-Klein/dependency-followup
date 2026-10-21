@@ -140,9 +140,9 @@ The tests do not need a `.env` file: they set their own `SECRET_KEY`.
 
 ## Comparison with monday.com
 
-- **monday.com (AI Risk Insights):** identifies risks from data and conversations that live inside the tool, at the level of teams and project portfolios.
-- **This tool:** the status is built from evidence in an external correspondence that is pasted into the system, relative to a defined required outcome, with quotes verified in code. It is meant for one person who tracks dependencies on external parties.
-- **What is implemented so far:** the required outcome and the deadline (stages 1–3). Pasting a thread and the AI analysis with quote verification are planned for stages 4–6 and do not exist yet.
+- **The core idea:** the system distinguishes real progress from a report of progress. "We're on it" is a report. A dated written confirmation is progress. The check is made against a defined required outcome, with verified quotes from the correspondence.
+- **monday.com (AI Risk Insights):** identifies risks from data and conversations inside the tool, at the level of teams and project portfolios. Here an external correspondence that is pasted into the system is analysed, and the tool is meant for one person who tracks dependencies on external parties.
+- **What is implemented so far:** the required outcome and the deadline (stages 1–3). Pasting a thread and the AI analysis, including the distinction between a report and progress and the quote verification, are planned for stages 4–6 and do not exist yet.
 - **Basis of the comparison:** monday.com's documentation only, not hands-on use.
 
 ## Known limitations
