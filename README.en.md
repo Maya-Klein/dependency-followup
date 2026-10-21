@@ -31,23 +31,28 @@ web  ──►  core      (pure logic, no Flask and no DB)
 | Component | Files | Role |
 |---|---|---|
 | `app/core/` | `deadlines.py` | Days remaining (`days_remaining`), the urgency level (`urgency_level`), the Hebrew wording (`days_text`) and "today" in Israel time (`today_in_israel`). Pure functions that take `today` as a parameter, so tests are deterministic. |
-| `app/storage/` | `db.py`, `repository.py` | The `topics` table definition and the `add_topic` and `list_topics` functions. The connection is set by `DATABASE_URL` (default `sqlite:///data/app.db`). An empty title, or one longer than 200 characters, is rejected. |
-| `app/web/` | `__init__.py`, `routes.py`, `templates/`, `static/` | The Flask app: `create_app()`, the `GET /` and `POST /` routes, and Jinja2 templates with automatic escaping. |
+| `app/storage/` | `db.py`, `repository.py` | The `topics` table definition (title, required outcome, deadline) and the `add_topic`, `list_topics`, `get_topic`, `update_topic` and `delete_topic` functions. The connection is set by `DATABASE_URL` (default `sqlite:///data/app.db`). An empty title or outcome is rejected, as is a title longer than 200 characters or an outcome longer than 2000. |
+| `app/web/` | `__init__.py`, `routes.py`, `templates/`, `static/` | The Flask app: `create_app()` (loads `SECRET_KEY` from `.env` and enables CSRF protection), the list, create, detail, edit and delete routes, and Jinja2 templates with automatic escaping. |
 | `run.py` | | Starts the local server on `127.0.0.1:5000`. |
 | `tests/` | | pytest tests for all three layers. |
 
 ## Data flow
 
 **Adding a topic (`POST /`):**
-1. The form submits a title and a date.
-2. The route validates the date and the title length. `add_topic` strips surrounding whitespace and rejects an empty title.
+1. The form submits a title, a required outcome, a date and a CSRF token. A request without a valid token is rejected with 400.
+2. The route validates the date, and `add_topic` strips surrounding whitespace and rejects an empty or too long title or outcome.
 3. The topic is saved in the `topics` table.
 4. The browser is redirected to `GET /` (303 redirect). On an error the page comes back with status 400 and a Hebrew message, and the input is kept.
 
 **Showing the list (`GET /`):**
 1. `list_topics` fetches the topics sorted by deadline.
 2. For each topic, `days_remaining` computes the days remaining against `today_in_israel()`, and `urgency_level` sets the level.
-3. The template shows the title, the date, the days wording and a label, with the CSS class `level-<level>`. Colour is not the only carrier of the information, because there is also a text label.
+3. The template shows the title, the date, the days wording and a label, with the CSS class `level-<level>`. For "today" and "tomorrow" the days wording is not shown, because it repeats the label (display only). Colour is not the only carrier of the information, because there is also a text label. Each card is a link as a whole, leading to the topic detail page.
+
+**Detail, edit and delete (`/topics/<id>`):**
+1. The detail page shows the title, the level, the deadline and the required outcome. An id that does not exist returns a Hebrew 404.
+2. Editing (`/edit`) uses the same validation as creating, and on an error the topic is left unchanged.
+3. Deletion: `GET /delete` shows a confirmation page and deletes nothing. The deletion itself is POST-only, with a CSRF token.
 
 Urgency is computed in code only.
 
@@ -81,7 +86,7 @@ The app is available at http://127.0.0.1:5000. The DB file is stored in `data/ap
 .venv\Scripts\python -m pytest
 ```
 
-The tests cover the boundary values of the levels, month and year transitions, the time zone around midnight, saving and loading from a fresh connection, an empty or too long title, an invalid date, and a title containing HTML code that is shown as text.
+The tests cover the boundary values of the levels, month and year transitions, the time zone around midnight, saving and loading from a fresh connection, an empty or too long title and outcome, an invalid date, a title and outcome containing HTML code that are shown as text on every page, creating, editing and deleting (including the 404 and POST-only deletion), hiding the days wording for "today" and "tomorrow", and CSRF protection (a request with no token, a wrong token or a token from another session is rejected and changes nothing).
 
 ## What the app does and does not do
 
