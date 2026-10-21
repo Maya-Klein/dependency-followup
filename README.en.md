@@ -138,6 +138,13 @@ The tests do not need a `.env` file: they set their own `SECRET_KEY`.
 - No update history and no AI analysis of threads.
 - No login, multiple users or cloud deployment. A single user on `127.0.0.1`.
 
+## Comparison with monday.com
+
+- **monday.com (AI Risk Insights):** identifies risks from data and conversations that live inside the tool, at the level of teams and project portfolios.
+- **This tool:** the status is built from evidence in an external correspondence that is pasted into the system, relative to a defined required outcome, with quotes verified in code. It is meant for one person who tracks dependencies on external parties.
+- **What is implemented so far:** the required outcome and the deadline (stages 1–3). Pasting a thread and the AI analysis with quote verification are planned for stages 4–6 and do not exist yet.
+- **Basis of the comparison:** monday.com's documentation only, not hands-on use.
+
 ## Known limitations
 
 - Days are counted by calendar only, with no working days, weekends or holidays.
