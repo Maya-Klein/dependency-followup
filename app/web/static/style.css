@@ -52,8 +52,7 @@ button:hover { background: var(--primary-hover); }
 .level-far { --bar: #2E7D32; --tint: #fff; --badge-bg: #E8F5E9; --badge-ink: #1B5E20; }
 .level-approaching { --bar: #FDD835; --tint: #fff; --badge-bg: #FFF4C2; --badge-ink: #5C4600; }
 .level-tomorrow { --bar: #EF6C00; --tint: #fff; --badge-bg: #FFCC80; --badge-ink: #6B2C00; }
-.level-today { --bar: #A33E14; --tint: #FBEDE6; --badge-bg: #fff; --badge-ink: #A33E14; }
-.level-today .pill { box-shadow: inset 0 0 0 2px #A33E14; }
+.level-today { --bar: #A33E14; --tint: #FBEDE6; --badge-bg: #A33E14; --badge-ink: #fff; }
 .level-overdue { --bar: #D32F2F; --tint: #FDE7E7; --badge-bg: #D32F2F; --badge-ink: #fff; }
 .level-overdue .pill { font-weight: 600; }
 
