@@ -7,7 +7,7 @@
   <ul class="topics">
     {% for t in items %}
     <li class="level-{{ t.level }}">
-      <span class="title">{{ t.title }}</span>
+      <a class="title" href="{{ url_for('main.detail', topic_id=t.id) }}">{{ t.title }}</a>
       <div class="meta">
         <bdi class="due">{{ t.due_date.strftime('%d/%m/%Y') }}</bdi>
         <bdi class="days">{{ t.days_text }}</bdi>
@@ -29,12 +29,7 @@
     <h2 class="form-title">הוספת נושא</h2>
     <form method="post" action="{{ url_for('main.create') }}">
       {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
-      <label>כותרת
-        <input type="text" name="title" value="{{ title }}" maxlength="{{ max_title }}" required>
-      </label>
-      <label>מועד יעד
-        <input type="date" name="due_date" value="{{ due }}" required>
-      </label>
+      {% include "_topic_fields.html" %}
       <button type="submit">שמירה</button>
     </form>
   </details>

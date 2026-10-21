@@ -1,0 +1,9 @@
+<label>כותרת
+  <input type="text" name="title" value="{{ form.title }}" maxlength="{{ max_title }}" required>
+</label>
+<label>תוצאה נדרשת
+  <textarea name="required_outcome" rows="3" maxlength="{{ max_outcome }}" required>{{ form.required_outcome }}</textarea>
+</label>
+<label>מועד יעד
+  <input type="date" name="due_date" value="{{ form.due }}" required>
+</label>

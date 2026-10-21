@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}עריכת הנושא · מעקב תלויות{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('main.detail', topic_id=topic.id) }}">&rarr; חזרה לנושא</a>
+<h1>עריכת הנושא</h1>
+
+<form method="post" action="{{ url_for('main.edit', topic_id=topic.id) }}">
+  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+  {% include "_topic_fields.html" %}
+  <button type="submit">שמירה</button>
+  <a class="cancel" href="{{ url_for('main.detail', topic_id=topic.id) }}">ביטול</a>
+</form>
+{% endblock %}
