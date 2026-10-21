@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Stage 1 (spec "Gate 1": save a deadline and show it in a colour by days remaining) is done and merged to `main` (PR #1). The current branch is `feature/stitch-design` (stage 2). The docs are `docs/spec.md` (Hebrew product spec) and `docs/plan.md` (approved staged plan, 7 stages, each with its tests). The final mobile design is in `docs/design/mobile-final.png`. Read `docs/plan.md` before starting any work and work one stage at a time. Stage 2 is a Stitch design of the gate-1 page (a course requirement), the Stitch project is "מעקב תלויות – שער 1 (סופי)". Keep anything outside the MVP in the "בהמשך" list in `docs/plan.md`.
+Stage 1 (spec "Gate 1": save a deadline and show it in a colour by days remaining) and stage 2 (the Stitch design of the gate-1 page, implemented in the templates and CSS) are done and merged to `main` (PRs #1 and #5). Stage 3 (a full topic) has not started. The docs are `docs/spec.md` (Hebrew product spec) and `docs/plan.md` (approved staged plan, 7 stages, each with its tests). The final mobile design is in `docs/design/mobile-final.png`. Read `docs/plan.md` before starting any work and work one stage at a time. The Stitch project is "מעקב תלויות – שער 1 (סופי)". Keep anything outside the MVP in the "בהמשך" list in `docs/plan.md`.
 
 The docs are in Hebrew, and the UI is Hebrew with `dir="rtl"`.
 
@@ -57,3 +57,4 @@ The stage-2 Stitch redesign must replace only `web/templates/` and `web/static/`
 11. **מקורות.** האפיון ב-`docs/spec.md` והתוכנית ב-`docs/plan.md`. מבצעים רק את השלב הנוכחי בתוכנית.
 12. **README דו-לשוני.** כל שינוי ב-`README.md` מעודכן גם ב-`README.en.md` (תרגום לאנגלית), באותו commit. בראש שני הקבצים יש קישור לגרסה בשפה השנייה.
 13. **עיצוב UX/UI בסטיץ'.** העיצוב נעשה ב-Stitch דרך ה-MCP, ומאושר על ידי המשתמשת לפני מימוש בקוד.
+14. **עדכון סעיף הסטטוס.** בסוף כל שלב מעדכנים את סעיף "Project status" ב-`CLAUDE.md`: מה הושלם ומוזג, ומה השלב הבא.
