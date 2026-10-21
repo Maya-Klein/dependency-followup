@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}הדף לא נמצא · מעקב תלויות{% endblock %}
+{% block main_attrs %} class="narrow"{% endblock %}
 {% block content %}
 <h1>הדף לא נמצא</h1>
-<p class="empty">ייתכן שהנושא נמחק.</p>
+<p>ייתכן שהנושא נמחק.</p>
 <a class="back" href="{{ url_for('main.index') }}">&rarr; חזרה לרשימה</a>
 {% endblock %}

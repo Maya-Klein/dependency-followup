@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ topic.title }} · מעקב תלויות{% endblock %}
+{% block main_attrs %} class="narrow"{% endblock %}
 {% block content %}
 <a class="back" href="{{ url_for('main.index') }}">&rarr; חזרה לרשימה</a>
 

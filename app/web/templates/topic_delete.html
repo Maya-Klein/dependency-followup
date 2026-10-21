@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}מחיקת הנושא · מעקב תלויות{% endblock %}
+{% block main_attrs %} class="narrow"{% endblock %}
 {% block content %}
 <a class="back" href="{{ url_for('main.detail', topic_id=topic.id) }}">&rarr; חזרה לנושא</a>
 <h1>מחיקת הנושא</h1>

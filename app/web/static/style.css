@@ -57,7 +57,8 @@ button:hover { background: var(--primary-hover); }
 .level-overdue { --bar: #D32F2F; --tint: #FDE7E7; --badge-bg: #D32F2F; --badge-ink: #fff; }
 .level-overdue .pill { font-weight: 600; }
 
-/* Topic detail, edit and delete pages */
+/* Topic detail, edit and delete pages: a narrow column even on desktop */
+main.narrow { max-width: 40rem; }
 textarea { font: inherit; min-height: 96px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 8px; background: #fff; resize: vertical; }
 textarea:focus { outline: none; border: 2px solid var(--primary); padding: 9px 11px; }
 textarea:user-invalid { border-color: var(--err); }
@@ -74,7 +75,7 @@ a.title:hover { text-decoration: underline; }
 .btn, .cancel { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--field); border-radius: 8px; background: transparent; color: #3A4450; font-weight: 500; text-decoration: none; }
 .btn:hover { background: var(--bg); }
 .btn-danger, .btn-danger:hover { border-color: var(--err); background: transparent; color: var(--err); }
-button.btn-danger { min-height: 48px; }
+button.btn-danger { min-height: 48px; border: 1px solid var(--err); }
 .cancel { border-color: transparent; color: var(--muted); }
 .confirm { margin: 0; overflow-wrap: anywhere; }
 
