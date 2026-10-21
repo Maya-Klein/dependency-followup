@@ -456,3 +456,19 @@ def test_app_refuses_to_start_without_secret_key(db_url, monkeypatch):
 
     with pytest.raises(RuntimeError, match="SECRET_KEY"):
         create_app(db_url)
+
+
+# --- the whole list card is the link ---
+
+
+def test_each_list_card_has_a_chevron_and_exactly_one_link_to_its_topic(client, app):
+    first, second = add(app, "ראשון"), add(app, "שני")
+
+    html = client.get("/").get_data(as_text=True)
+    cards = html.split('<li class="')[1:]
+
+    assert len(cards) == 2
+    for card, topic_id in zip(cards, (first, second)):
+        assert card.count("<a ") == 1
+        assert f'<a class="title" href="/topics/{topic_id}">' in card
+        assert 'class="chev"' in card and 'aria-hidden="true"' in card
