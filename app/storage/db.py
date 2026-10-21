@@ -12,6 +12,7 @@ topics = Table(
     metadata,
     Column("id", Integer, primary_key=True),
     Column("title", Text, nullable=False),
+    Column("required_outcome", Text, nullable=False),
     Column("due_date", Date, nullable=False),
     Column("created_at", DateTime, nullable=False),
 )
