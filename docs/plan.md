@@ -41,6 +41,7 @@ app/
   web/static/style.css   # צבעי הדרגות
 tests/                   # pytest
 data/                    # קובץ ה-DB המקומי, לא עולה לגיט
+docs/screenshots/         # צילומי מסך מהאפליקציה האמיתית (נייד ומחשב), מתעדכנים בסוף כל שלב
 requirements.txt  run.py  README.md  .gitignore  .env.example
 ```
 
