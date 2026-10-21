@@ -4,7 +4,7 @@
 
 A tool for tracking topics that are waiting on someone else (a supplier, a colleague, an authority). Each topic has a deadline, and the code computes how many days remain and marks the topic with one of five urgency levels. The UI is in Hebrew, right to left.
 
-The project is built in small stages. Implemented so far: **stage 1 (gate 1)**: saving a deadline and showing it in a colour by days remaining, and **stage 2**: the Stitch design, in the templates and the CSS file. The spec is in [`docs/spec.md`](docs/spec.md) and the full plan in [`docs/plan.md`](docs/plan.md) (both in Hebrew).
+The project is built in small stages. Implemented so far: **stage 1 (gate 1)**: saving a deadline and showing it in a colour by days remaining, **stage 2**: the Stitch design, in the templates and the CSS file, and **stage 3**: several topics with a required outcome, a detail page, editing and deletion. The spec is in [`docs/spec.md`](docs/spec.md) and the full plan in [`docs/plan.md`](docs/plan.md) (both in Hebrew).
 
 ## Urgency levels
 
@@ -31,23 +31,28 @@ web  ──►  core      (pure logic, no Flask and no DB)
 | Component | Files | Role |
 |---|---|---|
 | `app/core/` | `deadlines.py` | Days remaining (`days_remaining`), the urgency level (`urgency_level`), the Hebrew wording (`days_text`) and "today" in Israel time (`today_in_israel`). Pure functions that take `today` as a parameter, so tests are deterministic. |
-| `app/storage/` | `db.py`, `repository.py` | The `topics` table definition and the `add_topic` and `list_topics` functions. The connection is set by `DATABASE_URL` (default `sqlite:///data/app.db`). An empty title, or one longer than 200 characters, is rejected. |
-| `app/web/` | `__init__.py`, `routes.py`, `templates/`, `static/` | The Flask app: `create_app()`, the `GET /` and `POST /` routes, and Jinja2 templates with automatic escaping. |
+| `app/storage/` | `db.py`, `repository.py` | The `topics` table definition (title, required outcome, deadline) and the `add_topic`, `list_topics`, `get_topic`, `update_topic` and `delete_topic` functions. The connection is set by `DATABASE_URL` (default `sqlite:///data/app.db`). An empty title or outcome is rejected, as is a title longer than 200 characters or an outcome longer than 2000. |
+| `app/web/` | `__init__.py`, `routes.py`, `templates/`, `static/` | The Flask app: `create_app()` (loads `SECRET_KEY` from `.env` and enables CSRF protection), the list, create, detail, edit and delete routes, and Jinja2 templates with automatic escaping. |
 | `run.py` | | Starts the local server on `127.0.0.1:5000`. |
 | `tests/` | | pytest tests for all three layers. |
 
 ## Data flow
 
 **Adding a topic (`POST /`):**
-1. The form submits a title and a date.
-2. The route validates the date and the title length. `add_topic` strips surrounding whitespace and rejects an empty title.
+1. The form submits a title, a required outcome, a date and a CSRF token. A request without a valid token is rejected with 400.
+2. The route validates the date, and `add_topic` strips surrounding whitespace and rejects an empty or too long title or outcome.
 3. The topic is saved in the `topics` table.
 4. The browser is redirected to `GET /` (303 redirect). On an error the page comes back with status 400 and a Hebrew message, and the input is kept.
 
 **Showing the list (`GET /`):**
 1. `list_topics` fetches the topics sorted by deadline.
 2. For each topic, `days_remaining` computes the days remaining against `today_in_israel()`, and `urgency_level` sets the level.
-3. The template shows the title, the date, the days wording and a label, with the CSS class `level-<level>`. Colour is not the only carrier of the information, because there is also a text label.
+3. The template shows the title, the date, the days wording and a label, with the CSS class `level-<level>`. For "today" and "tomorrow" the days wording is not shown, because it repeats the label (display only). Colour is not the only carrier of the information, because there is also a text label. Each card is a link as a whole, leading to the topic detail page.
+
+**Detail, edit and delete (`/topics/<id>`):**
+1. The detail page shows the title, the level, the deadline and the required outcome. An id that does not exist returns a Hebrew 404.
+2. Editing (`/edit`) uses the same validation as creating, and on an error the topic is left unchanged.
+3. Deletion: `GET /delete` shows a confirmation page and deletes nothing. The deletion itself is POST-only, with a CSRF token.
 
 Urgency is computed in code only.
 
@@ -60,7 +65,10 @@ git clone https://github.com/Maya-Klein/dependency-followup.git
 cd dependency-followup
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
+copy .env.example .env
 ```
+
+Then set a value for `SECRET_KEY` in `.env` (it is needed for CSRF protection, and the app does not start without it). Generate one with `python -c "import secrets; print(secrets.token_hex(32))"`. `.env` is not committed to git. On Linux and macOS use `cp` instead of `copy`.
 
 On Linux and macOS use `.venv/bin/python` instead of `.venv\Scripts\python`. The `tzdata` package is in the list because Windows has no built-in time zone database.
 
@@ -78,26 +86,26 @@ The app is available at http://127.0.0.1:5000. The DB file is stored in `data/ap
 .venv\Scripts\python -m pytest
 ```
 
-The tests cover the boundary values of the levels, month and year transitions, the time zone around midnight, saving and loading from a fresh connection, an empty or too long title, an invalid date, and a title containing HTML code that is shown as text.
+The tests cover the boundary values of the levels, month and year transitions, the time zone around midnight, saving and loading from a fresh connection, an empty or too long title and outcome, an invalid date, a title and outcome containing HTML code that are shown as text on every page, creating, editing and deleting (including the 404 and POST-only deletion), hiding the days wording for "today" and "tomorrow", and CSRF protection (a request with no token, a wrong token or a token from another session is rejected and changes nothing).
 
 ## What the app does and does not do
 
-**Does (stage 1):**
-- Saves a topic with a title and a deadline.
+**Does (stages 1–3):**
+- Saves a topic with a title, a required outcome and a deadline. All fields are mandatory.
 - Computes in code how many days remain (calendar days, Israel time) and marks the topic with one of five levels, with a colour and a text label.
-- Shows the list sorted by deadline. The title is shown as text, even if it contains HTML.
+- Shows the list sorted by deadline, with a link to the topic detail page. The title and the outcome are shown as text, even if they contain HTML, and a multi-line outcome keeps its line breaks.
+- Lets you edit a topic (title, outcome and deadline) and delete it, after a confirmation page. Deletion is POST-only, and every form is protected by a CSRF token (Flask-WTF).
 
 **Does not (yet):**
-- No open/closed status, required outcome, milestone or editing of a topic.
+- No open/closed status or milestone.
 - No update history and no AI analysis of threads.
 - No login, multiple users or cloud deployment. A single user on `127.0.0.1`.
 
 ## Known limitations
 
-- There is no CSRF protection on the forms. This is acceptable for an MVP (single user, local listening only) and must be added before adding login or deploying.
 - Days are counted by calendar only, with no working days, weekends or holidays.
 - The level thresholds are fixed in the code and cannot be configured.
-- Schema changes in the coming stages will require deleting the local DB file (`data/app.db`).
+- Stage 3 added a column (`required_outcome`) to the `topics` table. If you have a `data/app.db` from before stage 3, delete it. Schema changes in the coming stages will require this too.
 - `pip-audit` was run on `requirements.txt` (19.10.2026) and found no known vulnerabilities. It is worth running again when dependencies are added.
 - The Stitch edge-state and desktop screens were not verified. Only the mobile screen was approved.
 
@@ -105,12 +113,11 @@ The tests cover the boundary values of the levels, month and year transitions, t
 
 According to [`docs/plan.md`](docs/plan.md), one stage at a time:
 
-1. **Stage 3:** several topics: list, create, details, edit and delete.
-2. **Stage 4:** a dated update history (including a pasted thread) that is never overwritten, with deletion of an update entered by mistake.
-3. **Stage 5:** AI analysis of a thread, isolated and without a UI, with quote verification in code.
-4. **Stage 6:** connecting the analysis to the app.
-5. **Stage 7:** open/closed status and milestone.
-6. **Stage 8:** synthetic scenarios, and gate 3.
+1. **Stage 4:** a dated update history (including a pasted thread) that is never overwritten, with deletion of an update entered by mistake.
+2. **Stage 5:** AI analysis of a thread, isolated and without a UI, with quote verification in code.
+3. **Stage 6:** connecting the analysis to the app.
+4. **Stage 7:** open/closed status and milestone.
+5. **Stage 8:** synthetic scenarios, and gate 3.
 
 The order was changed on 21.10.2026 after lecturer feedback: an AI component is mandatory, so it was moved ahead of status and scenarios.
 

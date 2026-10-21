@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Stage 1 (spec "Gate 1": save a deadline and show it in a colour by days remaining) and stage 2 (the Stitch design of the gate-1 page, implemented in the templates and CSS) are done and merged to `main` (PRs #1 and #5). Stage 3 (several topics: list, create, details, edit, delete) has not started. On 21.10.2026 the stages were reordered after lecturer feedback that an AI component is mandatory: topics and dated updates (3–4), then AI thread analysis (5–6), then status and milestone (7), then synthetic scenarios (8). The docs are `docs/spec.md` (Hebrew product spec) and `docs/plan.md` (approved staged plan, 8 stages, each with its tests). The final mobile design is in `docs/design/mobile-final.png`. Read `docs/plan.md` before starting any work and work one stage at a time. The Stitch project is "מעקב תלויות – שער 1 (סופי)". Keep anything outside the MVP in the "בהמשך" list in `docs/plan.md`.
+Stage 1 (spec "Gate 1": save a deadline and show it in a colour by days remaining), stage 2 (the Stitch design of the gate-1 page, implemented in the templates and CSS) and stage 3 (several topics: a required outcome, a detail page, edit and delete; the detail screen was designed in Stitch, mobile only) are done and merged to `main` (PRs #1, #5 and #20). Stage 4 (dated updates) is next. On 21.10.2026 the stages were reordered after lecturer feedback that an AI component is mandatory: topics and dated updates (3–4), then AI thread analysis (5–6), then status and milestone (7), then synthetic scenarios (8). The docs are `docs/spec.md` (Hebrew product spec) and `docs/plan.md` (approved staged plan, 8 stages, each with its tests). The final mobile design is in `docs/design/mobile-final.png`. Read `docs/plan.md` before starting any work and work one stage at a time. The Stitch project is "מעקב תלויות – שער 1 (סופי)". Keep anything outside the MVP in the "בהמשך" list in `docs/plan.md`.
 
 The docs are in Hebrew, and the UI is Hebrew with `dir="rtl"`.
 
@@ -14,8 +14,9 @@ Obsidian work log: a `Stop` hook (`.claude/settings.json` → `.claude/hooks/log
 
 ## Commands
 
-Stack: Python, Flask + Jinja2, SQLAlchemy Core on SQLite, pytest. Use the local venv (`.venv`, git-ignored); setup: `python -m venv .venv`, then `.venv\Scripts\python -m pip install -r requirements.txt`.
+Stack: Python, Flask + Jinja2 (Flask-WTF for CSRF), SQLAlchemy Core on SQLite, pytest. Use the local venv (`.venv`, git-ignored); setup: `python -m venv .venv`, then `.venv\Scripts\python -m pip install -r requirements.txt`.
 
+- First run: copy `.env.example` to `.env` and set `SECRET_KEY` (`python -c "import secrets; print(secrets.token_hex(32))"`). The app refuses to start without it. Tests set their own key and do not need `.env`.
 - Run the app: `.venv\Scripts\python run.py` (http://127.0.0.1:5000)
 - Run all tests: `.venv\Scripts\python -m pytest`
 - Run one test: `.venv\Scripts\python -m pytest tests/test_deadlines.py::test_name`
@@ -37,9 +38,10 @@ The stage-2 Stitch redesign must replace only `web/templates/` and `web/static/`
 - **Urgency is computed only in code, never by the AI.** Days remaining and the colour level come from `core/deadlines.py`. AI output (from stage 5) must not change a topic's level.
 - **Days are calendar days on a date only, in Israel time (`Asia/Jerusalem`).** Functions take `today` as a parameter so tests are deterministic. On Windows the `tzdata` package is needed.
 - **Five levels, thresholds defined once as constants:** `far` (6+ days), `approaching` (2–5), `tomorrow` (1), `today` (0), `overdue` (below 0). A closed topic gets a neutral level and is never overdue (from stage 7).
-- **Escaping:** user text (titles, updates, later AI quotes) is rendered through Jinja2 autoescaping. Never use `|safe` on user input. A title containing HTML must be shown as text, and stage 1 has a test for it. A blank title is rejected.
+- **Escaping:** user text (titles, required outcomes, updates, later AI quotes) is rendered through Jinja2 autoescaping. Never use `|safe` on user input. A title containing HTML must be shown as text, and stage 1 has a test for it. A blank title is rejected.
 - **Update history is append-only.** Each update or thread is its own dated record and nothing is overwritten or edited. An update entered by mistake may be deleted (POST only, after a confirmation page), never rewritten. A user-entered summary must be marked as a summary, not a quote. The AI analyses one pasted thread as a whole and does not compare records.
 - **No AI component before stage 5.** The model has not been chosen yet.
+- **CSRF:** every POST form includes `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">`. `SECRET_KEY` comes only from `.env` (git-ignored); never hard-code a fallback. Web tests run with `WTF_CSRF_ENABLED = False`, and the CSRF tests use the `csrf_app` fixture.
 - **`data/` is git-ignored** (the local SQLite file). Early schema changes may be handled by deleting the local DB.
 
 ## כללי עבודה

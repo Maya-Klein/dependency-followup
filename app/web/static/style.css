@@ -38,7 +38,7 @@ button:hover { background: var(--primary-hover); }
 
 /* Topic cards */
 .topics { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.topics li { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid var(--line); border-inline-start: 6px solid var(--bar); border-radius: 8px; background: var(--tint); }
+.topics li { position: relative; display: grid; gap: 6px; padding: 14px 16px; padding-inline-end: 40px; border: 1px solid var(--line); border-inline-start: 6px solid var(--bar); border-radius: 8px; background: var(--tint); }
 .title { font-size: 17px; font-weight: 600; overflow-wrap: anywhere; }
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 14px; font-weight: 500; color: var(--muted); }
 .meta bdi { white-space: nowrap; }
@@ -52,10 +52,37 @@ button:hover { background: var(--primary-hover); }
 .level-far { --bar: #2E7D32; --tint: #fff; --badge-bg: #E8F5E9; --badge-ink: #1B5E20; }
 .level-approaching { --bar: #FDD835; --tint: #fff; --badge-bg: #FFF4C2; --badge-ink: #5C4600; }
 .level-tomorrow { --bar: #EF6C00; --tint: #fff; --badge-bg: #FFCC80; --badge-ink: #6B2C00; }
-.level-today { --bar: #A33E14; --tint: #FBEDE6; --badge-bg: #fff; --badge-ink: #A33E14; }
-.level-today .pill { box-shadow: inset 0 0 0 2px #A33E14; }
+.level-today { --bar: #A33E14; --tint: #FBEDE6; --badge-bg: #A33E14; --badge-ink: #fff; }
 .level-overdue { --bar: #D32F2F; --tint: #FDE7E7; --badge-bg: #D32F2F; --badge-ink: #fff; }
 .level-overdue .pill { font-weight: 600; }
+
+/* Topic detail, edit and delete pages: a narrow column even on desktop */
+main.narrow { max-width: 40rem; }
+textarea { font: inherit; min-height: 96px; padding: 10px 12px; border: 1px solid var(--field); border-radius: 8px; background: #fff; resize: vertical; }
+textarea:focus { outline: none; border: 2px solid var(--primary); padding: 9px 11px; }
+textarea:user-invalid { border-color: var(--err); }
+/* The title link is stretched over the whole card, so the card is the click target; the chevron points left (the way forward in RTL) */
+a.title { color: inherit; text-decoration: none; }
+a.title::after { content: ""; position: absolute; inset: 0; border-radius: 8px; }
+a.title:focus-visible::after { outline: 2px solid var(--primary); outline-offset: 2px; }
+.topics li:hover { border-color: var(--field); }
+.topics li:hover a.title { text-decoration: underline; }
+/* top: card padding (14px) + half of the difference between the 17px title line (25.5px) and the 20px icon, so it sits on the title line */
+.chev { position: absolute; inset-inline-end: 12px; top: 17px; width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
+.back { display: inline-block; margin-bottom: 16px; color: var(--muted); font-weight: 500; text-decoration: none; }
+.back:hover { color: var(--ink); }
+.card { display: grid; gap: 12px; margin-bottom: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--tint, var(--card)); }
+.detail { border-inline-start: 6px solid var(--bar); }
+.detail-title { margin: 0; font-size: 24px; font-weight: 600; overflow-wrap: anywhere; }
+.card-title { margin: 0; font-size: 17px; font-weight: 600; }
+.outcome { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.actions { display: flex; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.btn, .cancel { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--field); border-radius: 8px; background: transparent; color: #3A4450; font-weight: 500; text-decoration: none; }
+.btn:hover { background: var(--bg); }
+.btn-danger, .btn-danger:hover { border-color: var(--err); background: transparent; color: var(--err); }
+button.btn-danger { min-height: 48px; border: 1px solid var(--err); }
+.cancel { border-color: transparent; color: var(--muted); }
+.confirm { margin: 0; overflow-wrap: anywhere; }
 
 @media (min-width: 900px) {
   main { max-width: 68rem; padding-top: 40px; }
