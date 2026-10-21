@@ -4,7 +4,7 @@
 
 A tool for tracking topics that are waiting on someone else (a supplier, a colleague, an authority). Each topic has a deadline, and the code computes how many days remain and marks the topic with one of five urgency levels. The UI is in Hebrew, right to left.
 
-The project is built in small stages. Implemented so far: **stage 1 (gate 1)**: saving a deadline and showing it in a colour by days remaining, and **stage 2**: the Stitch design, in the templates and the CSS file. The spec is in [`docs/spec.md`](docs/spec.md) and the full plan in [`docs/plan.md`](docs/plan.md) (both in Hebrew).
+The project is built in small stages. Implemented so far: **stage 1 (gate 1)**: saving a deadline and showing it in a colour by days remaining, **stage 2**: the Stitch design, in the templates and the CSS file, and **stage 3**: several topics with a required outcome, a detail page, editing and deletion. The spec is in [`docs/spec.md`](docs/spec.md) and the full plan in [`docs/plan.md`](docs/plan.md) (both in Hebrew).
 
 ## Urgency levels
 
@@ -82,13 +82,14 @@ The tests cover the boundary values of the levels, month and year transitions, t
 
 ## What the app does and does not do
 
-**Does (stage 1):**
-- Saves a topic with a title and a deadline.
+**Does (stages 1–3):**
+- Saves a topic with a title, a required outcome and a deadline. All fields are mandatory.
 - Computes in code how many days remain (calendar days, Israel time) and marks the topic with one of five levels, with a colour and a text label.
-- Shows the list sorted by deadline. The title is shown as text, even if it contains HTML.
+- Shows the list sorted by deadline, with a link to the topic detail page. The title and the outcome are shown as text, even if they contain HTML, and a multi-line outcome keeps its line breaks.
+- Lets you edit a topic (title, outcome and deadline) and delete it, after a confirmation page. Deletion is POST-only.
 
 **Does not (yet):**
-- No open/closed status, required outcome, milestone or editing of a topic.
+- No open/closed status or milestone.
 - No update history and no AI analysis of threads.
 - No login, multiple users or cloud deployment. A single user on `127.0.0.1`.
 
@@ -97,7 +98,7 @@ The tests cover the boundary values of the levels, month and year transitions, t
 - There is no CSRF protection on the forms. This is acceptable for an MVP (single user, local listening only) and must be added before adding login or deploying.
 - Days are counted by calendar only, with no working days, weekends or holidays.
 - The level thresholds are fixed in the code and cannot be configured.
-- Schema changes in the coming stages will require deleting the local DB file (`data/app.db`).
+- Stage 3 added a column (`required_outcome`) to the `topics` table. If you have a `data/app.db` from before stage 3, delete it. Schema changes in the coming stages will require this too.
 - `pip-audit` was run on `requirements.txt` (19.10.2026) and found no known vulnerabilities. It is worth running again when dependencies are added.
 - The Stitch edge-state and desktop screens were not verified. Only the mobile screen was approved.
 
@@ -105,12 +106,11 @@ The tests cover the boundary values of the levels, month and year transitions, t
 
 According to [`docs/plan.md`](docs/plan.md), one stage at a time:
 
-1. **Stage 3:** several topics: list, create, details, edit and delete.
-2. **Stage 4:** a dated update history (including a pasted thread) that is never overwritten, with deletion of an update entered by mistake.
-3. **Stage 5:** AI analysis of a thread, isolated and without a UI, with quote verification in code.
-4. **Stage 6:** connecting the analysis to the app.
-5. **Stage 7:** open/closed status and milestone.
-6. **Stage 8:** synthetic scenarios, and gate 3.
+1. **Stage 4:** a dated update history (including a pasted thread) that is never overwritten, with deletion of an update entered by mistake.
+2. **Stage 5:** AI analysis of a thread, isolated and without a UI, with quote verification in code.
+3. **Stage 6:** connecting the analysis to the app.
+4. **Stage 7:** open/closed status and milestone.
+5. **Stage 8:** synthetic scenarios, and gate 3.
 
 The order was changed on 21.10.2026 after lecturer feedback: an AI component is mandatory, so it was moved ahead of status and scenarios.
 
