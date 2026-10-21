@@ -3,7 +3,15 @@ from datetime import date
 from flask import Blueprint, abort, current_app, redirect, render_template, request, url_for
 from flask_wtf.csrf import CSRFError
 
-from app.core.deadlines import LEVEL_LABELS, days_remaining, days_text, today_in_israel, urgency_level
+from app.core.deadlines import (
+    LEVEL_LABELS,
+    TODAY,
+    TOMORROW,
+    days_remaining,
+    days_text,
+    today_in_israel,
+    urgency_level,
+)
 from app.storage.repository import (
     MAX_OUTCOME_LENGTH,
     MAX_TITLE_LENGTH,
@@ -34,7 +42,14 @@ def _engine():
 def _decorate(topic, today):
     days = days_remaining(topic["due_date"], today)
     level = urgency_level(days)
-    return {**topic, "days_text": days_text(days), "level": level, "label": LEVEL_LABELS[level]}
+    return {
+        **topic,
+        "days_text": days_text(days),
+        # display only: the badge already says "היום" / "מחר", so the days text would repeat it
+        "show_days": level not in (TODAY, TOMORROW),
+        "level": level,
+        "label": LEVEL_LABELS[level],
+    }
 
 
 def _topic_or_404(topic_id):

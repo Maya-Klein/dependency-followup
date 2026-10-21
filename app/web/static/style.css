@@ -67,7 +67,8 @@ a.title::after { content: ""; position: absolute; inset: 0; border-radius: 8px; 
 a.title:focus-visible::after { outline: 2px solid var(--primary); outline-offset: 2px; }
 .topics li:hover { border-color: var(--field); }
 .topics li:hover a.title { text-decoration: underline; }
-.chev { position: absolute; inset-inline-end: 12px; top: 50%; width: 20px; height: 20px; margin-top: -10px; color: var(--muted); pointer-events: none; }
+/* top: card padding (14px) + half of the difference between the 17px title line (25.5px) and the 20px icon, so it sits on the title line */
+.chev { position: absolute; inset-inline-end: 12px; top: 17px; width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
 .back { display: inline-block; margin-bottom: 16px; color: var(--muted); font-weight: 500; text-decoration: none; }
 .back:hover { color: var(--ink); }
 .card { display: grid; gap: 12px; margin-bottom: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--tint, var(--card)); }

@@ -66,12 +66,33 @@ def test_valid_post_redirects_and_topic_is_listed(client):
 
 @pytest.mark.parametrize(
     "offset, text",
-    [(1, "בעוד יום"), (2, "בעוד יומיים"), (0, "היום"), (-1, "לפני יום"), (-2, "לפני יומיים")],
+    [(2, "בעוד יומיים"), (-1, "לפני יום"), (-2, "לפני יומיים"), (10, "בעוד 10 ימים")],
 )
 def test_days_text_rendered_in_page(client, offset, text):
     post(client, "x", (TODAY + timedelta(days=offset)).isoformat())
 
     assert f'<bdi class="days">{text}</bdi>' in client.get("/").get_data(as_text=True)
+
+
+@pytest.mark.parametrize("offset, label", [(0, "היום"), (1, "מחר")])
+def test_days_text_hidden_for_today_and_tomorrow_but_badge_stays(client, offset, label):
+    post(client, "x", (TODAY + timedelta(days=offset)).isoformat())
+
+    html = client.get("/").get_data(as_text=True)
+
+    assert 'class="days"' not in html
+    assert f'<span class="badge">{label}</span>' in html
+    assert '<bdi class="due">' in html
+
+
+@pytest.mark.parametrize("offset, label", [(0, "היום"), (1, "מחר")])
+def test_detail_hides_days_text_for_today_and_tomorrow(client, app, offset, label):
+    topic_id = add(app, due=(TODAY + timedelta(days=offset)).isoformat())
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert 'class="days"' not in html
+    assert f'<span class="badge">{label}</span>' in html
 
 
 @pytest.mark.parametrize(

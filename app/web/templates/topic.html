@@ -13,7 +13,7 @@
       <span class="badge">{{ topic.label }}</span>
     </span>
     <bdi class="due">{{ topic.due_date.strftime('%d/%m/%Y') }}</bdi>
-    <bdi class="days">{{ topic.days_text }}</bdi>
+    {% if topic.show_days %}<bdi class="days">{{ topic.days_text }}</bdi>{% endif %}
   </div>
   <div class="actions">
     <a class="btn" href="{{ url_for('main.edit_form', topic_id=topic.id) }}">עריכת הנושא</a>
