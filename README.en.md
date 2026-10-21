@@ -105,11 +105,14 @@ The tests cover the boundary values of the levels, month and year transitions, t
 
 According to [`docs/plan.md`](docs/plan.md), one stage at a time:
 
-1. **Stage 3:** a full topic: required outcome, milestone and open/closed status.
-2. **Stage 4:** a dated update history that is never overwritten.
-3. **Stage 5:** synthetic scenarios and tests for the non-AI part.
-4. **Stage 6:** AI analysis of a thread, isolated and without a UI, with quote verification in code.
-5. **Stage 7:** connecting the analysis to the app, and gate 3.
+1. **Stage 3:** several topics: list, create, details, edit and delete.
+2. **Stage 4:** a dated update history (including a pasted thread) that is never overwritten, with deletion of an update entered by mistake.
+3. **Stage 5:** AI analysis of a thread, isolated and without a UI, with quote verification in code.
+4. **Stage 6:** connecting the analysis to the app.
+5. **Stage 7:** open/closed status and milestone.
+6. **Stage 8:** synthetic scenarios, and gate 3.
+
+The order was changed on 21.10.2026 after lecturer feedback: an AI component is mandatory, so it was moved ahead of status and scenarios.
 
 Ideas outside the MVP are collected in the "בהמשך" (later) section of `docs/plan.md`.
 
