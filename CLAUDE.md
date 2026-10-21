@@ -14,8 +14,9 @@ Obsidian work log: a `Stop` hook (`.claude/settings.json` → `.claude/hooks/log
 
 ## Commands
 
-Stack: Python, Flask + Jinja2, SQLAlchemy Core on SQLite, pytest. Use the local venv (`.venv`, git-ignored); setup: `python -m venv .venv`, then `.venv\Scripts\python -m pip install -r requirements.txt`.
+Stack: Python, Flask + Jinja2 (Flask-WTF for CSRF), SQLAlchemy Core on SQLite, pytest. Use the local venv (`.venv`, git-ignored); setup: `python -m venv .venv`, then `.venv\Scripts\python -m pip install -r requirements.txt`.
 
+- First run: copy `.env.example` to `.env` and set `SECRET_KEY` (`python -c "import secrets; print(secrets.token_hex(32))"`). The app refuses to start without it. Tests set their own key and do not need `.env`.
 - Run the app: `.venv\Scripts\python run.py` (http://127.0.0.1:5000)
 - Run all tests: `.venv\Scripts\python -m pytest`
 - Run one test: `.venv\Scripts\python -m pytest tests/test_deadlines.py::test_name`
@@ -40,6 +41,7 @@ The stage-2 Stitch redesign must replace only `web/templates/` and `web/static/`
 - **Escaping:** user text (titles, updates, later AI quotes) is rendered through Jinja2 autoescaping. Never use `|safe` on user input. A title containing HTML must be shown as text, and stage 1 has a test for it. A blank title is rejected.
 - **Update history is append-only.** Each update or thread is its own dated record and nothing is overwritten or edited. An update entered by mistake may be deleted (POST only, after a confirmation page), never rewritten. A user-entered summary must be marked as a summary, not a quote. The AI analyses one pasted thread as a whole and does not compare records.
 - **No AI component before stage 5.** The model has not been chosen yet.
+- **CSRF:** every POST form includes `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">`. `SECRET_KEY` comes only from `.env` (git-ignored); never hard-code a fallback. Web tests run with `WTF_CSRF_ENABLED = False`, and the CSRF tests use the `csrf_app` fixture.
 - **`data/` is git-ignored** (the local SQLite file). Early schema changes may be handled by deleting the local DB.
 
 ## כללי עבודה

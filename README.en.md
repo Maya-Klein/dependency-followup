@@ -60,7 +60,10 @@ git clone https://github.com/Maya-Klein/dependency-followup.git
 cd dependency-followup
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt
+copy .env.example .env
 ```
+
+Then set a value for `SECRET_KEY` in `.env` (it is needed for CSRF protection, and the app does not start without it). Generate one with `python -c "import secrets; print(secrets.token_hex(32))"`. `.env` is not committed to git. On Linux and macOS use `cp` instead of `copy`.
 
 On Linux and macOS use `.venv/bin/python` instead of `.venv\Scripts\python`. The `tzdata` package is in the list because Windows has no built-in time zone database.
 
@@ -86,7 +89,7 @@ The tests cover the boundary values of the levels, month and year transitions, t
 - Saves a topic with a title, a required outcome and a deadline. All fields are mandatory.
 - Computes in code how many days remain (calendar days, Israel time) and marks the topic with one of five levels, with a colour and a text label.
 - Shows the list sorted by deadline, with a link to the topic detail page. The title and the outcome are shown as text, even if they contain HTML, and a multi-line outcome keeps its line breaks.
-- Lets you edit a topic (title, outcome and deadline) and delete it, after a confirmation page. Deletion is POST-only.
+- Lets you edit a topic (title, outcome and deadline) and delete it, after a confirmation page. Deletion is POST-only, and every form is protected by a CSRF token (Flask-WTF).
 
 **Does not (yet):**
 - No open/closed status or milestone.
@@ -95,7 +98,6 @@ The tests cover the boundary values of the levels, month and year transitions, t
 
 ## Known limitations
 
-- There is no CSRF protection on the forms. This is acceptable for an MVP (single user, local listening only) and must be added before adding login or deploying.
 - Days are counted by calendar only, with no working days, weekends or holidays.
 - The level thresholds are fixed in the code and cannot be configured.
 - Stage 3 added a column (`required_outcome`) to the `topics` table. If you have a `data/app.db` from before stage 3, delete it. Schema changes in the coming stages will require this too.
