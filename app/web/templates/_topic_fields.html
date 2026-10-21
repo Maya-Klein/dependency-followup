@@ -1,3 +1,4 @@
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 <label>כותרת
   <input type="text" name="title" value="{{ form.title }}" maxlength="{{ max_title }}" required>
 </label>

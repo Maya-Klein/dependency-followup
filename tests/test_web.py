@@ -1,3 +1,4 @@
+import re
 from datetime import date, timedelta
 
 import pytest
@@ -10,6 +11,14 @@ TODAY = date(2026, 10, 18)
 
 @pytest.fixture
 def app(db_url, monkeypatch):
+    monkeypatch.setattr("app.web.routes.today_in_israel", lambda: TODAY)
+    app = create_app(db_url)
+    app.config["WTF_CSRF_ENABLED"] = False  # the CSRF tests below use csrf_app instead
+    return app
+
+
+@pytest.fixture
+def csrf_app(db_url, monkeypatch):
     monkeypatch.setattr("app.web.routes.today_in_israel", lambda: TODAY)
     return create_app(db_url)
 
@@ -350,3 +359,100 @@ def test_multiline_outcome_keeps_line_breaks_without_html(client, app):
 
     assert "א\nב" in html
     assert "<br" not in html
+
+
+# --- CSRF protection (csrf_app has the protection on) ---
+
+TOKEN_RE = re.compile(r'name="csrf_token" value="([^"]+)"')
+
+
+def token_from(client, path):
+    html = client.get(path).get_data(as_text=True)
+    match = TOKEN_RE.search(html)
+    assert match, f"no csrf_token field on {path}"
+    return match.group(1)
+
+
+def form_data(token, title="נושא", outcome=OUTCOME):
+    return {"title": title, "due_date": "2026-10-28", "required_outcome": outcome, "csrf_token": token}
+
+
+@pytest.mark.parametrize("path", ["/", "/topics/{id}/edit", "/topics/{id}/delete"])
+def test_every_form_has_a_csrf_token_field(csrf_app, path):
+    topic_id = add(csrf_app)
+
+    assert token_from(csrf_app.test_client(), path.format(id=topic_id))
+
+
+@pytest.mark.parametrize("path", ["/", "/topics/{id}/edit", "/topics/{id}/delete"])
+@pytest.mark.parametrize("token", [None, "", "not-a-real-token"])
+def test_post_without_valid_token_is_rejected_and_changes_nothing(csrf_app, path, token):
+    topic_id = add(csrf_app, "מקורי")
+    data = form_data(token) if token is not None else {k: v for k, v in form_data("x").items() if k != "csrf_token"}
+
+    resp = csrf_app.test_client().post(path.format(id=topic_id), data=data)
+
+    assert resp.status_code == 400
+    assert "הטופס פג תוקף או שאינו תקין" in resp.get_data(as_text=True)
+    assert [t["title"] for t in list_topics(csrf_app.config["ENGINE"])] == ["מקורי"]
+
+
+def test_token_from_another_session_is_rejected(csrf_app):
+    topic_id = add(csrf_app)
+    stolen = token_from(csrf_app.test_client(), f"/topics/{topic_id}/delete")
+
+    resp = csrf_app.test_client().post(f"/topics/{topic_id}/delete", data={"csrf_token": stolen})
+
+    assert resp.status_code == 400
+    assert get_topic(csrf_app.config["ENGINE"], topic_id) is not None
+
+
+def test_create_with_valid_token(csrf_app):
+    client = csrf_app.test_client()
+
+    resp = client.post("/", data=form_data(token_from(client, "/"), "חדש"))
+
+    assert resp.status_code == 303
+    assert [t["title"] for t in list_topics(csrf_app.config["ENGINE"])] == ["חדש"]
+
+
+def test_edit_with_valid_token(csrf_app):
+    topic_id = add(csrf_app, "ישן")
+    client = csrf_app.test_client()
+
+    resp = client.post(f"/topics/{topic_id}/edit", data=form_data(token_from(client, f"/topics/{topic_id}/edit"), "חדש"))
+
+    assert resp.status_code == 303
+    assert get_topic(csrf_app.config["ENGINE"], topic_id)["title"] == "חדש"
+
+
+def test_delete_with_valid_token(csrf_app):
+    topic_id = add(csrf_app)
+    client = csrf_app.test_client()
+
+    resp = client.post(f"/topics/{topic_id}/delete", data={"csrf_token": token_from(client, f"/topics/{topic_id}/delete")})
+
+    assert resp.status_code == 303
+    assert get_topic(csrf_app.config["ENGINE"], topic_id) is None
+
+
+def test_get_delete_confirmation_needs_no_token_and_deletes_nothing(csrf_app):
+    topic_id = add(csrf_app)
+
+    assert csrf_app.test_client().get(f"/topics/{topic_id}/delete").status_code == 200
+    assert get_topic(csrf_app.config["ENGINE"], topic_id) is not None
+
+
+def test_session_cookie_is_samesite_lax_and_httponly(csrf_app):
+    cookie = csrf_app.test_client().get("/").headers.get("Set-Cookie", "")
+
+    assert "SameSite=Lax" in cookie
+    assert "HttpOnly" in cookie
+
+
+def test_app_refuses_to_start_without_secret_key(db_url, monkeypatch):
+    monkeypatch.delenv("SECRET_KEY")
+    monkeypatch.setattr("app.web.load_dotenv", lambda: None)  # do not read the real .env
+
+    with pytest.raises(RuntimeError, match="SECRET_KEY"):
+        create_app(db_url)

@@ -1,6 +1,7 @@
 from datetime import date
 
 from flask import Blueprint, abort, current_app, redirect, render_template, request, url_for
+from flask_wtf.csrf import CSRFError
 
 from app.core.deadlines import LEVEL_LABELS, days_remaining, days_text, today_in_israel, urgency_level
 from app.storage.repository import (
@@ -96,6 +97,11 @@ def _render_edit(topic, status=200, error=None, form=None):
 @bp.app_errorhandler(404)
 def not_found(_error):
     return render_template("404.html"), 404
+
+
+@bp.app_errorhandler(CSRFError)
+def csrf_failed(_error):
+    return render_template("csrf_error.html"), 400
 
 
 @bp.get("/")

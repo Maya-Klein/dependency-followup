@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}הטופס לא תקין · מעקב תלויות{% endblock %}
+{% block main_attrs %} class="narrow"{% endblock %}
+{% block content %}
+<h1>הטופס פג תוקף או שאינו תקין</h1>
+<p>לא בוצע שום שינוי. חזרו לרשימה ונסו שוב.</p>
+<a class="back" href="{{ url_for('main.index') }}">&rarr; חזרה לרשימה</a>
+{% endblock %}

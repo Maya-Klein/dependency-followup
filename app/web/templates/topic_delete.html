@@ -6,6 +6,7 @@
 <h1>מחיקת הנושא</h1>
 
 <form method="post" action="{{ url_for('main.delete', topic_id=topic.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <p class="confirm">למחוק את הנושא <strong class="confirm-title">{{ topic.title }}</strong>? אי אפשר לבטל את המחיקה.</p>
   <button type="submit" class="btn-danger">כן, למחוק את הנושא</button>
   <a class="cancel" href="{{ url_for('main.detail', topic_id=topic.id) }}">ביטול</a>
