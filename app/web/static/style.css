@@ -98,7 +98,8 @@ fieldset.radios { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; min
 .update-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 14px; color: var(--muted); }
 .update-date { font-weight: 600; color: var(--ink); }
 .update-kind { font-weight: 500; }
-.update-delete { margin-inline-start: auto; color: var(--muted); }
+.update-delete { margin-inline-start: auto; color: var(--muted); text-decoration: none; }
+.update-delete:hover { color: var(--ink); text-decoration: underline; }
 .update-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .thread .update-body { padding-inline-start: 12px; border-inline-start: 2px solid var(--field); }
 .update-body details { margin-top: 4px; }

@@ -61,14 +61,14 @@
       </div>
       {% if u.excerpt %}
       <div class="update-body">
-        <p class="update-text">{{ u.excerpt }}</p>
+        <p class="update-text" dir="auto">{{ u.excerpt }}</p>
         <details>
           <summary>הצגת הטקסט המלא</summary>
-          <p class="update-text">{{ u.content }}</p>
+          <p class="update-text" dir="auto">{{ u.content }}</p>
         </details>
       </div>
       {% else %}
-      <p class="update-text update-body">{{ u.content }}</p>
+      <p class="update-text update-body" dir="auto">{{ u.content }}</p>
       {% endif %}
     </li>
     {% endfor %}
