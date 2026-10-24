@@ -25,4 +25,56 @@
   <h2 class="card-title">התוצאה הנדרשת</h2>
   <p class="outcome">{{ topic.required_outcome }}</p>
 </section>
+
+<section class="updates-section">
+  <h2 class="section-title">היסטוריית עדכונים</h2>
+
+  <details class="add-update"{% if error %} open{% endif %}>
+    <summary>+ הוספת עדכון</summary>
+    <form method="post" action="{{ url_for('main.add_update_route', topic_id=topic.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+      <fieldset class="radios">
+        <legend>סוג העדכון</legend>
+        <label><input type="radio" name="kind" value="{{ THREAD }}" required{% if form.kind == THREAD %} checked{% endif %}> ציטוט מהתכתבות</label>
+        <label><input type="radio" name="kind" value="{{ USER_SUMMARY }}" required{% if form.kind == USER_SUMMARY %} checked{% endif %}> סיכום שיחה או פגישה</label>
+      </fieldset>
+      <label>תוכן העדכון
+        <textarea name="content" rows="5" required>{{ form.content }}</textarea>
+      </label>
+      <label>תאריך העדכון
+        <input type="date" name="entry_date" value="{{ form.entry }}" max="{{ today.isoformat() }}" required>
+      </label>
+      <button type="submit">הוספת עדכון</button>
+    </form>
+  </details>
+
+  {% if updates %}
+  <ol class="updates">
+    {% for u in updates %}
+    <li class="update{% if u.kind == THREAD %} thread{% endif %}">
+      <div class="update-meta">
+        <bdi class="update-date">{{ u.entry_date.strftime('%d.%m.%Y') }}</bdi>
+        {% if u.kind == USER_SUMMARY %}<span class="update-kind">סיכום</span>{% endif %}
+        {% if u.entered != u.entry_date %}<span class="entered">הוזן ב-<bdi>{{ u.entered.strftime('%d.%m.%Y') }}</bdi></span>{% endif %}
+        <a class="update-delete" href="{{ url_for('main.delete_update_confirm', topic_id=topic.id, update_id=u.id) }}">מחיקה</a>
+      </div>
+      {% if u.excerpt %}
+      <div class="update-body">
+        <p class="update-text">{{ u.excerpt }}</p>
+        <details>
+          <summary>הצגת הטקסט המלא</summary>
+          <p class="update-text">{{ u.content }}</p>
+        </details>
+      </div>
+      {% else %}
+      <p class="update-text update-body">{{ u.content }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="empty">אין עדכונים עדיין.</p>
+  {% endif %}
+</section>
 {% endblock %}
