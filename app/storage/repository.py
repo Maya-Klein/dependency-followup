@@ -14,6 +14,9 @@ USER_SUMMARY = "user_summary"
 # The thread limit only guards against a huge paste; saving a whole thread matters more than keeping it short
 MAX_UPDATE_LENGTHS = {THREAD: 200000, USER_SUMMARY: 5000}
 
+# An id above this does not exist, and SQLite raises OverflowError instead of finding nothing
+MAX_ID = 2**63 - 1
+
 
 def clean_topic_fields(title, required_outcome):
     """Trim and validate; ValueError's message is the code of the first problem found."""
@@ -51,6 +54,8 @@ def list_topics(engine):
 
 
 def get_topic(engine, topic_id):
+    if topic_id > MAX_ID:
+        return None
     with engine.connect() as conn:
         row = conn.execute(select(topics).where(topics.c.id == topic_id)).mappings().first()
     return dict(row) if row else None
@@ -70,6 +75,8 @@ def update_topic(engine, topic_id, title, due_date, required_outcome):
 
 def delete_topic(engine, topic_id):
     """Returns False if the topic does not exist. Its updates are deleted with it (ON DELETE CASCADE)."""
+    if topic_id > MAX_ID:
+        return False
     with engine.begin() as conn:
         result = conn.execute(delete(topics).where(topics.c.id == topic_id))
     return result.rowcount > 0
@@ -119,6 +126,8 @@ def list_updates(engine, topic_id):
 
 
 def get_update(engine, update_id):
+    if update_id > MAX_ID:
+        return None
     with engine.connect() as conn:
         row = conn.execute(select(updates).where(updates.c.id == update_id)).mappings().first()
     return dict(row) if row else None
@@ -126,6 +135,8 @@ def get_update(engine, update_id):
 
 def delete_update(engine, update_id):
     """Only for an update entered by mistake; there is no edit. Returns False if it does not exist."""
+    if update_id > MAX_ID:
+        return False
     with engine.begin() as conn:
         result = conn.execute(delete(updates).where(updates.c.id == update_id))
     return result.rowcount > 0

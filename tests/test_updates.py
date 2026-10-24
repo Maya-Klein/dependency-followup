@@ -205,3 +205,13 @@ def test_excerpt_checks_punctuation_after_trimming_trailing_whitespace():
 
     assert excerpt("\n".join(lines)) == "\n".join(lines[:-1]) + "…"
     assert excerpt("\n".join(["ש"] * 7 + ["סוף.", "עוד"])) == "\n".join(["ש"] * 7 + ["סוף."])
+
+
+def test_ids_beyond_the_database_range_find_nothing_instead_of_raising(engine, topic_id):
+    huge = 2**63
+
+    assert get_topic(engine, huge) is None
+    assert get_update(engine, huge) is None
+    assert delete_topic(engine, huge) is False
+    assert delete_update(engine, huge) is False
+    assert get_topic(engine, 2**63 - 1) is None  # the largest valid id is also fine

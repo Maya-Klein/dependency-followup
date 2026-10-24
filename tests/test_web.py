@@ -932,3 +932,29 @@ def test_a_200000_character_thread_is_saved_whole_in_any_script(client, app, cha
 
     assert resp.status_code == 303  # also fits MAX_CONTENT_LENGTH and MAX_FORM_MEMORY_SIZE
     assert updates_of(app, topic_id)[0]["content"] == thread.strip()
+
+
+HUGE_ID = "9" * 25  # beyond SQLite's integer range
+
+
+@pytest.mark.parametrize(
+    "method, path",
+    [
+        ("get", "/topics/{huge}"),
+        ("get", "/topics/{huge}/edit"),
+        ("post", "/topics/{huge}/edit"),
+        ("get", "/topics/{huge}/delete"),
+        ("post", "/topics/{huge}/delete"),
+        ("post", "/topics/{huge}/updates"),
+        ("get", "/topics/{topic}/updates/{huge}/delete"),
+        ("post", "/topics/{topic}/updates/{huge}/delete"),
+        ("get", "/topics/{huge}/updates/{huge}/delete"),
+    ],
+)
+def test_an_id_beyond_the_database_range_is_404_not_a_server_error(client, app, method, path):
+    topic_id = add(app)
+
+    resp = getattr(client, method)(path.format(huge=HUGE_ID, topic=topic_id))
+
+    assert resp.status_code == 404
+    assert "הדף לא נמצא" in resp.get_data(as_text=True)
