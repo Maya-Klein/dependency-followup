@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}הבקשה גדולה מדי · מעקב תלויות{% endblock %}
+{% block main_attrs %} class="narrow"{% endblock %}
+{% block content %}
+<h1>הבקשה גדולה מדי</h1>
+<p>לא נשמר שום דבר. אפשר לקצר את הטקסט או לפצל אותו לכמה עדכונים.</p>
+<a class="back" href="{{ url_for('main.index') }}">&rarr; חזרה לרשימה</a>
+{% endblock %}

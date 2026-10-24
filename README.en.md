@@ -4,7 +4,7 @@
 
 A tool for tracking topics that are waiting on someone else (a supplier, a colleague, an authority). Each topic has a deadline, and the code computes how many days remain and marks the topic with one of five urgency levels. The UI is in Hebrew, right to left.
 
-The project is built in small stages. Implemented so far: **stage 1 (gate 1)**: saving a deadline and showing it in a colour by days remaining, **stage 2**: the Stitch design, in the templates and the CSS file, and **stage 3**: several topics with a required outcome, a detail page, editing and deletion. The spec is in [`docs/spec.md`](docs/spec.md) and the full plan in [`docs/plan.md`](docs/plan.md) (both in Hebrew).
+The project is built in small stages. Implemented so far: **stage 1 (gate 1)**: saving a deadline and showing it in a colour by days remaining, **stage 2**: the Stitch design, in the templates and the CSS file, **stage 3**: several topics with a required outcome, a detail page, editing and deletion, and **stage 4**: a dated update history (a pasted correspondence or a summary of a conversation). The spec is in [`docs/spec.md`](docs/spec.md) and the full plan in [`docs/plan.md`](docs/plan.md) (both in Hebrew).
 
 ## Urgency levels
 
@@ -30,9 +30,10 @@ web  ──►  core      (pure logic, no Flask and no DB)
 
 | Component | Files | Role |
 |---|---|---|
-| `app/core/` | `deadlines.py` | Days remaining (`days_remaining`), the urgency level (`urgency_level`), the Hebrew wording (`days_text`) and "today" in Israel time (`today_in_israel`). Pure functions that take `today` as a parameter, so tests are deterministic. |
-| `app/storage/` | `db.py`, `repository.py` | The `topics` table definition (title, required outcome, deadline) and the `add_topic`, `list_topics`, `get_topic`, `update_topic` and `delete_topic` functions. The connection is set by `DATABASE_URL` (default `sqlite:///data/app.db`). An empty title or outcome is rejected, as is a title longer than 200 characters or an outcome longer than 2000. |
-| `app/web/` | `__init__.py`, `routes.py`, `templates/`, `static/` | The Flask app: `create_app()` (loads `SECRET_KEY` from `.env` and enables CSRF protection), the list, create, detail, edit and delete routes, and Jinja2 templates with automatic escaping. |
+| `app/core/` | `deadlines.py` | Days remaining (`days_remaining`), the urgency level (`urgency_level`), the Hebrew wording (`days_text`) "today" in Israel time (`today_in_israel`), and the Israel date of a stored timestamp (`israel_date`). Pure functions that take `today` as a parameter, so tests are deterministic. |
+| `app/core/` | `updates.py` | `excerpt`: the first part of a long update (up to 500 characters or 8 lines), shown with "show full text". |
+| `app/storage/` | `db.py`, `repository.py` | The `topics` table (title, required outcome, deadline) and the `updates` table (kind, content, entry date, time entered, and a link to the topic with cascading delete), and the `add_topic`, `list_topics`, `get_topic`, `update_topic`, `delete_topic`, `add_update`, `list_updates`, `get_update` and `delete_update` functions. The connection is set by `DATABASE_URL` (default `sqlite:///data/app.db`). An empty title or outcome is rejected, as is a title longer than 200 characters or an outcome longer than 2000. A correspondence is limited to 200,000 characters and a summary to 5,000. SQLite runs with `PRAGMA foreign_keys=ON` on every connection, otherwise deleting a topic would not delete its updates. |
+| `app/web/` | `__init__.py`, `routes.py`, `templates/`, `static/` | The Flask app: `create_app()` (loads `SECRET_KEY` from `.env` and enables CSRF protection), the list, create, detail, edit, delete and update routes, and Jinja2 templates with automatic escaping. |
 | `run.py` | | Starts the local server on `127.0.0.1:5000`. |
 | `.env.example` | | A template for the local settings (`SECRET_KEY`). The `.env` file itself is not committed to git. |
 | `tests/` | | pytest tests for all three layers. |
@@ -47,8 +48,11 @@ The app's routes:
 | `GET /topics/<id>/edit`, `POST /topics/<id>/edit` | The edit form, and saving the changes |
 | `GET /topics/<id>/delete` | The delete confirmation page (deletes nothing) |
 | `POST /topics/<id>/delete` | Deletes the topic |
+| `POST /topics/<id>/updates` | Adds an update to the topic |
+| `GET /topics/<id>/updates/<uid>/delete` | The update delete confirmation page (deletes nothing) |
+| `POST /topics/<id>/updates/<uid>/delete` | Deletes the update |
 
-Every POST request requires a CSRF token, and without one the response is 400 on a Hebrew error page. A topic id that does not exist returns a Hebrew 404.
+Every POST request requires a CSRF token, and without one the response is 400 on a Hebrew error page. A topic or update id that does not exist, or an update that belongs to another topic, returns a Hebrew 404. A request larger than 4MB returns a Hebrew 413. There is no way to edit an update, only to add and delete.
 
 ## Data flow
 
@@ -67,6 +71,13 @@ Every POST request requires a CSRF token, and without one the response is 400 on
 1. The detail page shows the title, the level, the deadline and the required outcome. An id that does not exist returns a Hebrew 404.
 2. Editing (`/edit`) uses the same validation as creating, and on an error the topic is left unchanged.
 3. Deletion: `GET /delete` shows a confirmation page and deletes nothing. The deletion itself is POST-only, with a CSRF token.
+
+**Update history (`POST /topics/<id>/updates`):**
+1. On the detail page, the collapsed form asks for a kind ("ציטוט מהתכתבות", a pasted quote, or "סיכום שיחה או פגישה", a conversation or meeting summary; no default), the content and a date (default: today). It is `novalidate`, and the server checks everything.
+2. The server strips surrounding whitespace, turns `\r\n` into `\n`, and rejects an invalid kind, empty content, an invalid or future date, and content that is too long (on an excess it shows a message with the actual length and the limit, keeps the input, and saves nothing).
+3. Every update is saved as a separate record (`updates`) and never overwrites another. The newest is shown first.
+4. A correspondence is marked by a line at its edge, and a summary by the word "סיכום" next to the date. A long update is shown as an excerpt with "show full text" (no JavaScript), and once opened only the full text is shown, with a "compact view" label.
+5. An update entered by mistake can be deleted after a confirmation page (POST-only, with CSRF). Deleting a topic also deletes its updates.
 
 Urgency is computed in code only.
 
@@ -121,48 +132,51 @@ The app is available at http://127.0.0.1:5000. The DB file is stored in `data/ap
 .venv/bin/python -m pytest
 ```
 
-The tests cover the boundary values of the levels, month and year transitions, the time zone around midnight, saving and loading from a fresh connection, an empty or too long title and outcome, an invalid date, a title and outcome containing HTML code that are shown as text on every page, creating, editing and deleting (including the 404 and POST-only deletion), hiding the days wording for "today" and "tomorrow", and CSRF protection (a request with no token, a wrong token or a token from another session is rejected and changes nothing).
+The tests cover the boundary values of the levels, month and year transitions, the time zone around midnight, saving and loading from a fresh connection, an empty or too long title and outcome, an invalid date, a title and outcome containing HTML code that are shown as text on every page, creating, editing and deleting (including the 404 and POST-only deletion), hiding the days wording for "today" and "tomorrow", and CSRF protection (a request with no token, a wrong token or a token from another session is rejected and changes nothing). For updates: order and which topic they belong to, the length limits, an invalid kind, a future date, escaping, folding a long update, deletion and cascade, and a 404 for a huge id.
 
 The tests do not need a `.env` file: they set their own `SECRET_KEY`.
 
 ## What the app does and does not do
 
-**Does (stages 1–3):**
+**Does (stages 1–4):**
 - Saves a topic with a title, a required outcome and a deadline. All fields are mandatory.
 - Computes in code how many days remain (calendar days, Israel time) and marks the topic with one of five levels, with a colour and a text label.
 - Shows the list sorted by deadline, with a link to the topic detail page. The title and the outcome are shown as text, even if they contain HTML, and a multi-line outcome keeps its line breaks.
 - Lets you edit a topic (title, outcome and deadline) and delete it, after a confirmation page. Deletion is POST-only, and every form is protected by a CSRF token (Flask-WTF).
+- Keeps a dated update history for each topic: a thread pasted as it is (up to 200,000 characters) or a summary of a conversation or meeting in your own words (up to 5,000). An update is never overwritten or edited, and one entered by mistake can be deleted, after a confirmation.
 
 **Does not (yet):**
 - No open/closed status or milestone.
-- No update history and no AI analysis of threads.
+- No AI analysis of threads. Threads are saved but not analysed.
 - No login, multiple users or cloud deployment. A single user on `127.0.0.1`.
 
 ## Comparison with monday.com
 
 - **The core idea:** the system distinguishes real progress from a report of progress. "We're on it" is a report. A dated written confirmation is progress. The check is made against a defined required outcome, with verified quotes from the correspondence.
 - **monday.com (AI Risk Insights):** identifies risks from data and conversations inside the tool, at the level of teams and project portfolios. Here an external correspondence that is pasted into the system is analysed, and the tool is meant for one person who tracks dependencies on external parties.
-- **What is implemented so far:** the required outcome and the deadline (stages 1–3). Pasting a thread and the AI analysis, including the distinction between a report and progress and the quote verification, are planned for stages 4–6 and do not exist yet.
+- **What is implemented so far:** the required outcome and the deadline, and pasting a thread or a summary as an update history (stages 1–4). The AI analysis, including the distinction between a report and progress and the quote verification, is planned for stages 5–6 and does not exist yet.
 - **Basis of the comparison:** monday.com's documentation only, not hands-on use.
 
 ## Known limitations
 
 - Days are counted by calendar only, with no working days, weekends or holidays.
 - The level thresholds are fixed in the code and cannot be configured.
+- An update cannot be edited, only deleted. Deletions are not logged, so a deletion is final (on the "later" list in the plan).
 - Stage 3 added a column (`required_outcome`) to the `topics` table. If you have a `data/app.db` from before stage 3, delete it. Schema changes in the coming stages will require this too.
 - `pip-audit` was run on `requirements.txt` on 19.10.2026 and again on 21.10.2026 (after adding `flask-wtf` and `python-dotenv`), and both runs found no known vulnerabilities. It is worth running again when dependencies are added.
-- In Stitch only the mobile list screen and the mobile topic detail screen were approved. The desktop and edge-state screens generated there in stage 2 were not verified, and the edit and delete confirmation pages were built directly in code.
+- In Stitch only the mobile list screen, the mobile topic detail screen and the update history area on it (mobile only) were approved. The desktop and edge-state screens generated there in stage 2 were not verified, and the edit and delete confirmation pages were built directly in code.
 - The `designMd` in Stitch is out of sync with the code (a background tint for every level, the colour of the "approaching" badge, a solid "today" badge, a delete button without a fill). A new screen generated there may not match the app.
 
 ## Next steps
 
 According to [`docs/plan.md`](docs/plan.md), one stage at a time:
 
-1. **Stage 4:** a dated update history (including a pasted thread) that is never overwritten, with deletion of an update entered by mistake.
-2. **Stage 5:** AI analysis of a thread, isolated and without a UI, with quote verification in code.
-3. **Stage 6:** connecting the analysis to the app.
-4. **Stage 7:** open/closed status and milestone.
-5. **Stage 8:** synthetic scenarios, and gate 3.
+1. **Stage 5:** AI thread analysis, isolated and without a UI, with quote verification in code.
+2. **Stage 6:** connecting the analysis to the app.
+3. **Stage 7:** open/closed status and a milestone.
+4. **Stage 8:** synthetic scenarios, and gate 3.
+
+In addition: a deployment stage to a server (Railway), whose place will be decided later.
 
 The order was changed on 21.10.2026 after lecturer feedback: an AI component is mandatory, so it was moved ahead of status and scenarios.
 
@@ -179,13 +193,14 @@ The design was made in Stitch (project "מעקב תלויות – שער 1 (סו
 - **A clickable card:** every card in the list is a link to the detail page, with a small chevron on the left aligned to the title row.
 - **The detail page:** a title card with a colour stripe, a badge, the deadline, and the buttons "עריכת הנושא" (edit the topic) and "מחיקת הנושא" (delete the topic) in one row at its bottom. "Delete the topic" has no fill: red text and a thin red border. Below it is a "התוצאה הנדרשת" (the required outcome) card. The page is a narrow column (40rem) on desktop too. Its mobile design was made in Stitch and approved (the picture below), and the implementation uses the colours of `style.css`, not Stitch's.
 - **Edit and delete confirmation:** built in code in the same style, with no separate Stitch design. Deletion happens only after a confirmation page.
+- **Update history (stage 4):** an area on the detail page, designed in Stitch (mobile only) in two variants for marking the kind of an update; the variant without a tag was chosen. A correspondence is marked only by a line at its edge, and a summary by the word "סיכום" in small grey next to the date. The form is collapsed, and closes through "סגירה" (close) or "ביטול" (cancel). Error messages across the app are quiet: dark text, a thin red line at the edge and a very light background.
 
-Screenshots of the running app, from `docs/screenshots/` (Windows 11, Edge, mobile at 390 px wide and desktop at 1280 px wide, with sample data):
+Screenshots of the running app, from `docs/screenshots/` (Windows 11, mobile at 390 px wide and desktop at 1280 px wide, with sample data; the topic details page with the update history was captured in Chrome and the other screens in Edge):
 
 | Screen | Mobile | Desktop |
 |---|---|---|
 | List and add form | <img src="docs/screenshots/list-mobile.png" width="240" alt="The list on mobile"> | <img src="docs/screenshots/list-desktop.png" width="480" alt="The list on desktop"> |
-| Topic details | <img src="docs/screenshots/detail-mobile.png" width="240" alt="The topic details on mobile"> | <img src="docs/screenshots/detail-desktop.png" width="480" alt="The topic details on desktop"> |
+| Topic details (with update history) | <img src="docs/screenshots/detail-mobile.png" width="240" alt="The topic details on mobile"> | <img src="docs/screenshots/detail-desktop.png" width="480" alt="The topic details on desktop"> |
 | Edit | <img src="docs/screenshots/edit-mobile.png" width="240" alt="Editing a topic on mobile"> | <img src="docs/screenshots/edit-desktop.png" width="480" alt="Editing a topic on desktop"> |
 | Delete confirmation | <img src="docs/screenshots/delete-mobile.png" width="240" alt="Delete confirmation on mobile"> | <img src="docs/screenshots/delete-desktop.png" width="480" alt="Delete confirmation on desktop"> |
 
@@ -196,6 +211,10 @@ The initial design from Stitch was the starting point. In the implementation I c
 The mobile topic detail screen as approved in Stitch (stage 3). In the implementation the colours are those of `style.css`, and the "מחיקת הנושא" (delete the topic) button has no fill:
 
 ![The mobile topic detail screen from Stitch](docs/design/topic-detail-mobile.png)
+
+The update history area as approved (stage 4, the variant without a tag; taken from Stitch's HTML). The implementation differs: "סיכום" comes right after the date, the default date is today, and the form is collapsed:
+
+![The update history area on mobile from Stitch](docs/design/topic-updates-mobile.png)
 
 ## Development process and tools
 

@@ -11,7 +11,7 @@
 }
 :root {
   --bg: #F6F7F9; --card: #fff; --line: #E3E6EA; --ink: #1d2733; --muted: #5b6672;
-  --primary: #243447; --primary-hover: #34495f; --field: #C9CED6; --err: #D32F2F; --err-bg: #FDE7E7;
+  --primary: #243447; --primary-hover: #34495f; --field: #C9CED6; --err: #D32F2F; --err-bg: #FEF6F6;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.5 Rubik, system-ui, "Segoe UI", Arial, sans-serif; }
@@ -21,10 +21,10 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 16px; }
 .layout { display: grid; gap: 16px; }
 
 /* Add-topic form: a native <details> on mobile, always open on desktop */
-.add > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 8px; background: var(--primary); color: #fff; font-weight: 500; }
-.add > summary::-webkit-details-marker { display: none; }
-.add > summary:hover { background: var(--primary-hover); }
-.add[open] > summary { margin-bottom: 12px; }
+.add > summary, .add-update > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 8px; background: var(--primary); color: #fff; font-weight: 500; }
+.add > summary::-webkit-details-marker, .add-update > summary::-webkit-details-marker { display: none; }
+.add > summary:hover, .add-update > summary:hover { background: var(--primary-hover); }
+.add[open] > summary, .add-update[open] > summary { margin-bottom: 12px; }
 /* Desktop-only heading above the form; on mobile the summary button plays this role */
 .form-title { display: none; font-size: 17px; font-weight: 600; margin: 0 0 12px; }
 form { display: grid; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
@@ -34,7 +34,8 @@ input:focus { outline: none; border: 2px solid var(--primary); padding: 0 11px; 
 input:user-invalid { border-color: var(--err); }
 button { font: inherit; font-weight: 500; min-height: 48px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; cursor: pointer; }
 button:hover { background: var(--primary-hover); }
-.error { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--err-bg); color: var(--err); font-weight: 500; }
+/* Quiet error strip: dark text, a thin red line at the start edge, a very light background */
+.error { margin: 0; padding: 8px 12px; border-radius: 8px; border-inline-start: 3px solid var(--err); background: var(--err-bg); color: var(--ink); }
 
 /* Topic cards */
 .topics { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
@@ -83,6 +84,44 @@ a.title:focus-visible::after { outline: 2px solid var(--primary); outline-offset
 button.btn-danger { min-height: 48px; border: 1px solid var(--err); }
 .cancel { border-color: transparent; color: var(--muted); }
 .confirm { margin: 0; overflow-wrap: anywhere; }
+
+/* The update form's summary says "+ הוספת עדכון" when closed and "סגירה" when open */
+.add-update .when-open, .add-update[open] .when-closed { display: none; }
+.add-update[open] .when-open { display: inline; }
+.form-actions { display: flex; align-items: center; gap: 12px; }
+.form-actions button { flex: 1; }
+/* Update history: newest first; a pasted thread is marked only by the line at its start edge, a summary by the word "סיכום" */
+.updates-section { display: grid; gap: 12px; margin-top: 24px; }
+.section-title { margin: 0; font-size: 18px; font-weight: 600; }
+.add-update { display: grid; }
+fieldset.radios { display: grid; gap: 0; margin: 0; padding: 0; border: 0; min-width: 0; }
+.radios legend { padding: 0; margin-bottom: 2px; font-weight: 500; }
+.radios label { display: flex; align-items: center; gap: 8px; min-height: 36px; font-weight: 400; }
+.radios input { min-height: 0; width: 20px; height: 20px; padding: 0; accent-color: var(--primary); }
+.updates { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+.update { display: grid; gap: 6px; padding: 14px 16px; }
+.update + .update { border-top: 1px solid var(--line); }
+.update-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 14px; color: var(--muted); }
+.update-date { font-weight: 600; color: var(--ink); }
+.update-kind { font-weight: 500; }
+.update-delete { margin-inline-start: auto; color: var(--muted); text-decoration: none; }
+.update-delete:hover { color: var(--ink); text-decoration: underline; }
+.update-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: plaintext; }
+.confirm-question { margin: 0; font-size: 20px; font-weight: 600; }
+.confirm-warning { margin: 0; font-size: 14px; color: var(--muted); }
+.update-preview { border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+.thread .update-body { padding-inline-start: 12px; border-inline-start: 2px solid var(--field); }
+.add-update :user-invalid { border-color: var(--field); }
+/* Folding without JavaScript: the hidden checkbox is toggled by the labels; collapsed shows the excerpt, open shows only the full text */
+.fold { position: relative; display: grid; gap: 4px; }
+.fold-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; padding: 0; pointer-events: none; }
+.fold-label { cursor: pointer; width: fit-content; color: var(--muted); font-size: 14px; font-weight: 500; }
+.fold-label:hover { color: var(--ink); text-decoration: underline; }
+.fold-toggle:focus-visible ~ .fold-label { outline: 2px solid var(--primary); outline-offset: 2px; }
+.fold .full, .fold .collapse { display: none; }
+.fold-toggle:checked ~ .full { display: block; }
+.fold-toggle:checked ~ .collapse { display: block; }
+.fold-toggle:checked ~ .excerpt, .fold-toggle:checked ~ .expand { display: none; }
 
 @media (min-width: 900px) {
   main { max-width: 68rem; padding-top: 40px; }

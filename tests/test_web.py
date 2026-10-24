@@ -1,9 +1,19 @@
 import re
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
-from app.storage.repository import add_topic, get_topic, list_topics
+from app.core.deadlines import israel_date
+from app.storage.repository import (
+    THREAD,
+    USER_SUMMARY,
+    add_topic,
+    add_update,
+    get_topic,
+    get_update,
+    list_topics,
+    list_updates,
+)
 from app.web import create_app
 
 TODAY = date(2026, 10, 18)
@@ -493,3 +503,458 @@ def test_each_list_card_has_a_chevron_and_exactly_one_link_to_its_topic(client, 
         assert card.count("<a ") == 1
         assert f'<a class="title" href="/topics/{topic_id}">' in card
         assert 'class="chev"' in card and 'aria-hidden="true"' in card
+
+
+# --- update history (stage 4) ---
+
+
+def post_update(client, topic_id, kind=THREAD, content="עדכון", entry="2026-10-17"):
+    data = {"content": content, "entry_date": entry}
+    if kind is not None:
+        data["kind"] = kind
+    return client.post(f"/topics/{topic_id}/updates", data=data)
+
+
+def updates_of(app, topic_id):
+    return list_updates(app.config["ENGINE"], topic_id)
+
+
+def test_detail_without_updates_shows_empty_message_and_collapsed_form(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert "היסטוריית עדכונים" in html
+    assert "אין עדכונים עדיין" in html
+    assert '<details class="add-update">' in html
+
+
+def test_form_has_two_unchecked_radios_with_required_labels_and_today_as_default_date(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert "ציטוט מהתכתבות" in html and "סיכום שיחה או פגישה" in html
+    assert "checked" not in html
+    assert 'name="entry_date" value="2026-10-18"' in html
+    assert 'max="2026-10-18"' in html
+    assert 'name="channel"' not in html
+
+
+def test_add_update_redirects_and_it_is_listed(client, app):
+    topic_id = add(app)
+
+    resp = post_update(client, topic_id, THREAD, "הספק אישר")
+
+    assert resp.status_code == 303
+    assert resp.headers["Location"].endswith(f"/topics/{topic_id}")
+    assert "הספק אישר" in client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+
+def test_two_updates_are_listed_newest_first(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "ישן יותר", "2026-10-10")
+    post_update(client, topic_id, THREAD, "חדש יותר", "2026-10-12")
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert html.index("חדש יותר") < html.index("ישן יותר")
+    assert len(updates_of(app, topic_id)) == 2
+
+
+def test_update_of_one_topic_does_not_appear_on_another(client, app):
+    first, second = add(app, "ראשון"), add(app, "שני")
+    post_update(client, first, THREAD, "רק בראשון")
+
+    assert "רק בראשון" not in client.get(f"/topics/{second}").get_data(as_text=True)
+
+
+@pytest.mark.parametrize("kind", [None, "", "manual", "summary"])
+def test_invalid_or_missing_kind_is_rejected_and_text_kept(client, app, kind):
+    topic_id = add(app)
+
+    resp = post_update(client, topic_id, kind, "הטקסט שנשאר")
+    html = resp.get_data(as_text=True)
+
+    assert resp.status_code == 400
+    assert "יש לבחור סוג עדכון" in html
+    assert "הטקסט שנשאר" in html
+    assert '<details class="add-update" open>' in html
+    assert updates_of(app, topic_id) == []
+
+
+@pytest.mark.parametrize("content", ["", "   ", "\n \t"])
+def test_blank_content_is_rejected(client, app, content):
+    topic_id = add(app)
+
+    resp = post_update(client, topic_id, THREAD, content)
+
+    assert resp.status_code == 400
+    assert "יש להזין את תוכן העדכון" in resp.get_data(as_text=True)
+    assert updates_of(app, topic_id) == []
+
+
+def test_future_date_is_rejected_and_today_is_accepted(client, app):
+    topic_id = add(app)
+
+    future = post_update(client, topic_id, THREAD, "עתידי", "2026-10-19")
+    today = post_update(client, topic_id, THREAD, "היום", "2026-10-18")
+
+    assert future.status_code == 400 and "אי אפשר להזין תאריך עתידי" in future.get_data(as_text=True)
+    assert today.status_code == 303
+    assert [u["content"] for u in updates_of(app, topic_id)] == ["היום"]
+
+
+@pytest.mark.parametrize("entry", ["", "2026-02-30", "abc"])
+def test_invalid_entry_date_is_rejected(client, app, entry):
+    topic_id = add(app)
+
+    resp = post_update(client, topic_id, THREAD, "טקסט", entry)
+
+    assert resp.status_code == 400
+    assert "יש להזין תאריך תקין" in resp.get_data(as_text=True)
+    assert updates_of(app, topic_id) == []
+
+
+@pytest.mark.parametrize("kind, limit", [(THREAD, 200000), (USER_SUMMARY, 5000)])
+def test_length_limit_through_the_page(client, app, kind, limit):
+    topic_id = add(app)
+
+    ok = post_update(client, topic_id, kind, "א" * limit)
+    too_long = post_update(client, topic_id, kind, "ב" * (limit + 1))
+    html = too_long.get_data(as_text=True)
+
+    assert ok.status_code == 303
+    assert too_long.status_code == 400
+    assert f"{limit + 1:,} תווים" in html and f"המותר הוא {limit:,}" in html
+    if kind == THREAD:
+        assert "השרשור ארוך מדי לשמירה" in html
+        assert "לחלק" not in html and "מיילים קודמים" not in html  # no advice: saving the whole thread matters more
+    else:
+        assert "הסיכום ארוך מדי" in html and "כל חלק כעדכון נפרד" in html and "מיילים קודמים" not in html
+    assert "ב" * (limit + 1) in html  # the pasted text stays in the form
+    assert "maxlength" not in html.split('name="content"')[1].split(">")[0]
+    assert len(updates_of(app, topic_id)) == 1
+
+
+def test_oversized_request_is_413_in_hebrew_and_saves_nothing(client, app):
+    topic_id = add(app)
+
+    resp = post_update(client, topic_id, THREAD, "א" * (3 * 1024 * 1024))
+
+    assert resp.status_code == 413
+    assert "הבקשה גדולה מדי" in resp.get_data(as_text=True)
+    assert updates_of(app, topic_id) == []
+
+
+def test_html_in_update_is_shown_as_text_everywhere(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "<script>alert(1)</script> <b>x</b>")
+    post_update(client, topic_id, USER_SUMMARY, "<img src=x onerror=alert(2)>")
+    update_id = updates_of(app, topic_id)[0]["id"]
+
+    for path in (f"/topics/{topic_id}", f"/topics/{topic_id}/updates/{update_id}/delete"):
+        html = client.get(path).get_data(as_text=True)
+        assert "<script>alert(1)</script>" not in html
+        assert "<img src=x" not in html
+    detail = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+    assert "&lt;script&gt;alert(1)&lt;/script&gt; &lt;b&gt;x&lt;/b&gt;" in detail
+
+
+def test_rejected_form_escapes_the_kept_text(client, app):
+    topic_id = add(app)
+
+    html = post_update(client, topic_id, None, "<script>x</script>").get_data(as_text=True)
+
+    assert "<script>x</script>" not in html and "&lt;script&gt;x&lt;/script&gt;" in html
+
+
+def test_summary_is_marked_with_the_word_and_thread_is_not(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "התכתבות")
+    post_update(client, topic_id, USER_SUMMARY, "סיכום של שיחה")
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+    thread_item, summary_item = sorted(html.split('<li class="update')[1:], key=lambda item: "סיכום של שיחה" in item)
+
+    assert '<span class="update-kind">סיכום</span>' in summary_item
+    assert "update-kind" not in thread_item
+    assert 'class="update thread"' in html and html.count("update-kind") == 1
+    assert "שהזנתי" not in html and "לא ציטוט" not in html
+
+
+def test_short_update_is_shown_in_full_without_fold(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "ש\n" * 7 + "ח")
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert "הצגת הטקסט המלא" not in html
+
+
+@pytest.mark.parametrize("content", ["א" * 501, "\n".join(["ש"] * 9)])
+def test_long_update_is_folded_with_the_full_text_inside_details(client, app, content):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, content)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert "הצגת הטקסט המלא" in html and 'class="fold-toggle"' in html
+    assert html.count("הצגה מקוצרת") == 2  # a label above the full text and one after it
+    assert "כיווץ" not in html
+    assert content in html  # the full text is in the page, next to the excerpt
+    assert "<details>" not in html and "<script" not in html  # folding needs no JavaScript
+
+
+def test_line_breaks_are_kept_with_pre_wrap_and_no_extra_html(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "שורה א\r\nשורה ב")
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert "שורה א\nשורה ב" in html and "<br" not in html
+    assert "white-space: pre-wrap" in client.get("/static/style.css").get_data(as_text=True)
+
+
+def test_entered_on_is_shown_only_when_it_differs_from_the_entry_date(client, app):
+    topic_id = add(app)
+    engine = app.config["ENGINE"]
+    entered_today = israel_date(datetime.now(timezone.utc))
+    add_update(engine, topic_id, THREAD, "הוזן באותו יום", entered_today)
+    add_update(engine, topic_id, THREAD, "הוזן באיחור", date(2026, 10, 1))
+
+    items = client.get(f"/topics/{topic_id}").get_data(as_text=True).split('<li class="update')[1:]
+    same, late = sorted(items, key=lambda item: "הוזן באיחור" in item)
+
+    assert "הוזן ב-" not in same
+    assert f"הוזן ב-<bdi>{entered_today.strftime('%d.%m.%Y')}</bdi>" in late
+
+
+def test_delete_update_confirm_page_does_not_delete(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "יישאר")
+    update_id = updates_of(app, topic_id)[0]["id"]
+
+    resp = client.get(f"/topics/{topic_id}/updates/{update_id}/delete")
+
+    assert resp.status_code == 200 and "אי אפשר לבטל" in resp.get_data(as_text=True)
+    assert len(updates_of(app, topic_id)) == 1
+
+
+def test_delete_update_removes_only_that_one(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "יישאר", "2026-10-10")
+    post_update(client, topic_id, THREAD, "יימחק", "2026-10-12")
+    gone = updates_of(app, topic_id)[0]["id"]
+
+    resp = client.post(f"/topics/{topic_id}/updates/{gone}/delete")
+
+    assert resp.status_code == 303
+    assert [u["content"] for u in updates_of(app, topic_id)] == ["יישאר"]
+
+
+def test_delete_update_is_post_only(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "יישאר")
+    update_id = updates_of(app, topic_id)[0]["id"]
+
+    for method in ("put", "delete", "patch"):
+        assert getattr(client, method)(f"/topics/{topic_id}/updates/{update_id}/delete").status_code == 405
+    assert len(updates_of(app, topic_id)) == 1
+
+
+def test_there_is_no_way_to_edit_an_update(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "מקורי")
+    update_id = updates_of(app, topic_id)[0]["id"]
+
+    for path in (f"/topics/{topic_id}/updates/{update_id}", f"/topics/{topic_id}/updates/{update_id}/edit"):
+        assert client.get(path).status_code == 404
+        assert client.post(path, data={"content": "שונה"}).status_code in (404, 405)
+    assert updates_of(app, topic_id)[0]["content"] == "מקורי"
+
+
+def test_update_of_another_topic_or_missing_id_is_404(client, app):
+    first, second = add(app, "ראשון"), add(app, "שני")
+    post_update(client, first, THREAD, "של הראשון")
+    update_id = updates_of(app, first)[0]["id"]
+
+    for path in (f"/topics/{second}/updates/{update_id}/delete", f"/topics/{first}/updates/999/delete"):
+        assert client.get(path).status_code == 404
+        assert client.post(path).status_code == 404
+    assert len(updates_of(app, first)) == 1
+
+
+def test_adding_an_update_to_a_missing_topic_is_404(client, app):
+    assert post_update(client, 999).status_code == 404
+
+
+def test_deleting_a_topic_deletes_its_updates(client, app):
+    first, second = add(app, "ראשון"), add(app, "שני")
+    post_update(client, first, THREAD, "יימחק")
+    post_update(client, second, THREAD, "יישאר")
+    update_id = updates_of(app, first)[0]["id"]
+
+    client.post(f"/topics/{first}/delete")
+
+    assert get_update(app.config["ENGINE"], update_id) is None
+    assert len(updates_of(app, second)) == 1
+
+
+@pytest.mark.parametrize("path", ["/topics/{id}", "/topics/{id}/updates/{uid}/delete"])
+def test_update_forms_have_a_csrf_token_field(csrf_app, path):
+    topic_id = add(csrf_app)
+    uid = add_update(csrf_app.config["ENGINE"], topic_id, THREAD, "עדכון", date(2026, 10, 10))
+
+    assert token_from(csrf_app.test_client(), path.format(id=topic_id, uid=uid))
+
+
+@pytest.mark.parametrize("token", [None, "", "not-a-real-token"])
+def test_adding_and_deleting_an_update_without_a_valid_token_is_rejected(csrf_app, token):
+    topic_id = add(csrf_app)
+    uid = add_update(csrf_app.config["ENGINE"], topic_id, THREAD, "עדכון", date(2026, 10, 10))
+    data = {"kind": THREAD, "content": "חדש", "entry_date": "2026-10-17"}
+    if token is not None:
+        data["csrf_token"] = token
+
+    add_resp = csrf_app.test_client().post(f"/topics/{topic_id}/updates", data=data)
+    del_resp = csrf_app.test_client().post(f"/topics/{topic_id}/updates/{uid}/delete", data=data)
+
+    assert add_resp.status_code == del_resp.status_code == 400
+    assert [u["content"] for u in list_updates(csrf_app.config["ENGINE"], topic_id)] == ["עדכון"]
+
+
+def test_adding_and_deleting_an_update_with_a_valid_token(csrf_app):
+    topic_id = add(csrf_app)
+    client = csrf_app.test_client()
+    token = token_from(client, f"/topics/{topic_id}")
+
+    added = client.post(
+        f"/topics/{topic_id}/updates",
+        data={"kind": USER_SUMMARY, "content": "סיכום", "entry_date": "2026-10-17", "csrf_token": token},
+    )
+    uid = list_updates(csrf_app.config["ENGINE"], topic_id)[0]["id"]
+    deleted = client.post(f"/topics/{topic_id}/updates/{uid}/delete", data={"csrf_token": token})
+
+    assert added.status_code == deleted.status_code == 303
+    assert list_updates(csrf_app.config["ENGINE"], topic_id) == []
+
+
+def test_update_form_has_no_browser_validation_and_no_required_fields(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+    form = html.split('<form method="post" action="/topics/')[1].split("</form>")[0]
+
+    assert " novalidate" in form.split(">")[0]
+    assert "required" not in form
+    assert "maxlength" not in form
+
+
+def test_no_permanent_length_caption_under_the_content_field(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    for number in ("200,000", "200000", "5,000", "5000"):
+        assert number not in html
+
+
+def test_radio_labels_come_from_one_place(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert html.count("ציטוט מהתכתבות") == 1 and html.count("סיכום שיחה או פגישה") == 1
+
+
+def test_expanded_long_update_is_the_full_text_and_the_excerpt_is_hidden_by_css(client):
+    css = client.get("/static/style.css").get_data(as_text=True)
+
+    assert ".fold-toggle:checked ~ .excerpt" in css and ".fold-toggle:checked ~ .full" in css
+    assert "unicode-bidi: plaintext" in css  # each line takes its own direction
+
+
+def test_error_strip_is_quiet(client):
+    css = client.get("/static/style.css").get_data(as_text=True)
+    rule = next(line for line in css.splitlines() if line.startswith(".error {"))
+
+    assert "border-inline-start: 3px solid var(--err)" in rule
+    assert "color: var(--ink)" in rule and "color: var(--err)" not in rule
+
+
+def test_delete_update_page_shows_kind_and_warning_on_its_own_line(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, USER_SUMMARY, "סיכום קצר")
+    update_id = updates_of(app, topic_id)[0]["id"]
+
+    html = client.get(f"/topics/{topic_id}/updates/{update_id}/delete").get_data(as_text=True)
+
+    question = html.index('<p class="confirm-question">')
+    warning = html.index('<p class="confirm-warning">אי אפשר לבטל את המחיקה.</p>')
+    preview = html.index("update-preview")
+    buttons = html.index('<div class="form-actions">')
+
+    assert question < warning < preview < buttons  # question, then the small warning, then the update, then the buttons
+    assert '<span class="update-kind">סיכום שיחה או פגישה</span>' in html and "סיכום קצר" in html
+    assert "<bdi>" + date(2026, 10, 17).strftime("%d.%m.%Y") + "</bdi>" in html
+
+
+def test_open_update_form_has_a_label_swap_and_a_cancel_link_without_javascript(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+    form = html.split('<form method="post" action="/topics/')[1].split("</form>")[0]
+    css = client.get("/static/style.css").get_data(as_text=True)
+
+    assert '<span class="when-closed">+ הוספת עדכון</span><span class="when-open">סגירה</span>' in html
+    assert f'<a class="cancel" href="/topics/{topic_id}#updates">ביטול</a>' in form
+    assert ".add-update[open] .when-closed { display: none; }" in css
+    assert "<script" not in html
+
+
+def test_delete_update_page_has_cancel_back_to_the_topic(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "טקסט")
+    update_id = updates_of(app, topic_id)[0]["id"]
+
+    html = client.get(f"/topics/{topic_id}/updates/{update_id}/delete").get_data(as_text=True)
+
+    assert f'<a class="cancel" href="/topics/{topic_id}">ביטול</a>' in html
+
+
+@pytest.mark.parametrize("char", ["א", "😀", "a" + chr(10)])
+def test_a_200000_character_thread_is_saved_whole_in_any_script(client, app, char):
+    topic_id = add(app)
+    thread = (char * 200000)[:200000]
+
+    resp = post_update(client, topic_id, THREAD, thread)
+
+    assert resp.status_code == 303  # also fits MAX_CONTENT_LENGTH and MAX_FORM_MEMORY_SIZE
+    assert updates_of(app, topic_id)[0]["content"] == thread.strip()
+
+
+HUGE_ID = "9" * 25  # beyond SQLite's integer range
+
+
+@pytest.mark.parametrize(
+    "method, path",
+    [
+        ("get", "/topics/{huge}"),
+        ("get", "/topics/{huge}/edit"),
+        ("post", "/topics/{huge}/edit"),
+        ("get", "/topics/{huge}/delete"),
+        ("post", "/topics/{huge}/delete"),
+        ("post", "/topics/{huge}/updates"),
+        ("get", "/topics/{topic}/updates/{huge}/delete"),
+        ("post", "/topics/{topic}/updates/{huge}/delete"),
+        ("get", "/topics/{huge}/updates/{huge}/delete"),
+    ],
+)
+def test_an_id_beyond_the_database_range_is_404_not_a_server_error(client, app, method, path):
+    topic_id = add(app)
+
+    resp = getattr(client, method)(path.format(huge=HUGE_ID, topic=topic_id))
+
+    assert resp.status_code == 404
+    assert "הדף לא נמצא" in resp.get_data(as_text=True)

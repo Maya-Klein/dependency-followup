@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 ISRAEL_TZ = ZoneInfo("Asia/Jerusalem")
@@ -26,6 +26,13 @@ def today_in_israel(now=None):
     """Today's calendar date in Israel; `now` must be timezone-aware if given."""
     now = now or datetime.now(ISRAEL_TZ)
     return now.astimezone(ISRAEL_TZ).date()
+
+
+def israel_date(moment):
+    """Calendar date in Israel of a stored timestamp; a naive `moment` is taken as UTC."""
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment.astimezone(ISRAEL_TZ).date()
 
 
 def days_remaining(due, today):

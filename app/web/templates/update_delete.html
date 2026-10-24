@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}מחיקת עדכון · מעקב תלויות{% endblock %}
+{% block main_attrs %} class="narrow"{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('main.detail', topic_id=topic.id) }}">&rarr; חזרה לנושא</a>
+<h1>מחיקת עדכון</h1>
+
+<form method="post" action="{{ url_for('main.delete_update_route', topic_id=topic.id, update_id=update.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p class="confirm-question">למחוק את העדכון מ-<bdi>{{ update.entry_date.strftime('%d.%m.%Y') }}</bdi>?</p>
+  <p class="confirm-warning">אי אפשר לבטל את המחיקה.</p>
+  <div class="update update-preview{% if update.kind == THREAD %} thread{% endif %}">
+    <div class="update-meta">
+      <bdi class="update-date">{{ update.entry_date.strftime('%d.%m.%Y') }}</bdi>
+      <span class="update-kind">{{ kind_label }}</span>
+    </div>
+    <p class="update-text update-body">{{ excerpt or update.content }}</p>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn-danger">כן, למחוק את העדכון</button>
+    <a class="cancel" href="{{ url_for('main.detail', topic_id=topic.id) }}">ביטול</a>
+  </div>
+</form>
+{% endblock %}

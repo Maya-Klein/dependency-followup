@@ -25,4 +25,63 @@
   <h2 class="card-title">התוצאה הנדרשת</h2>
   <p class="outcome">{{ topic.required_outcome }}</p>
 </section>
+
+<section class="updates-section" id="updates">
+  <h2 class="section-title">היסטוריית עדכונים</h2>
+
+  <details class="add-update"{% if error %} open{% endif %}>
+    <summary><span class="when-closed">+ הוספת עדכון</span><span class="when-open">סגירה</span></summary>
+    {# novalidate: the browser's own messages are off; the server checks everything and answers in the page's own style #}
+    <form method="post" action="{{ url_for('main.add_update_route', topic_id=topic.id) }}" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+      <fieldset class="radios">
+        <legend>סוג העדכון</legend>
+        {% for value, label in KIND_LABELS.items() %}
+        <label><input type="radio" name="kind" value="{{ value }}"{% if form.kind == value %} checked{% endif %}> {{ label }}</label>
+        {% endfor %}
+      </fieldset>
+      <label>תוכן העדכון
+        <textarea name="content" rows="5">{{ form.content }}</textarea>
+      </label>
+      <label>תאריך העדכון
+        <input type="date" name="entry_date" value="{{ form.entry }}" max="{{ today.isoformat() }}">
+      </label>
+      <div class="form-actions">
+        <button type="submit">הוספת עדכון</button>
+        <a class="cancel" href="{{ url_for('main.detail', topic_id=topic.id) }}#updates">ביטול</a>
+      </div>
+    </form>
+  </details>
+
+  {% if updates %}
+  <ol class="updates">
+    {% for u in updates %}
+    <li class="update{% if u.kind == THREAD %} thread{% endif %}">
+      <div class="update-meta">
+        <bdi class="update-date">{{ u.entry_date.strftime('%d.%m.%Y') }}</bdi>
+        {% if u.kind == USER_SUMMARY %}<span class="update-kind">סיכום</span>{% endif %}
+        {% if u.entered != u.entry_date %}<span class="entered">הוזן ב-<bdi>{{ u.entered.strftime('%d.%m.%Y') }}</bdi></span>{% endif %}
+        <a class="update-delete" href="{{ url_for('main.delete_update_confirm', topic_id=topic.id, update_id=u.id) }}">מחיקה</a>
+      </div>
+      {% if u.excerpt %}
+      {# a long update folds with a hidden checkbox and labels, so it works without JavaScript #}
+      <div class="update-body fold">
+        <input type="checkbox" class="fold-toggle" id="fold-{{ u.id }}" aria-label="הצגת הטקסט המלא">
+        <label class="fold-label collapse collapse-top" for="fold-{{ u.id }}">הצגה מקוצרת</label>
+        <p class="update-text excerpt">{{ u.excerpt }}</p>
+        <p class="update-text full">{{ u.content }}</p>
+        <label class="fold-label expand" for="fold-{{ u.id }}">הצגת הטקסט המלא</label>
+        <label class="fold-label collapse collapse-bottom" for="fold-{{ u.id }}">הצגה מקוצרת</label>
+      </div>
+      {% else %}
+      <p class="update-text update-body">{{ u.content }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="empty">אין עדכונים עדיין.</p>
+  {% endif %}
+</section>
 {% endblock %}
