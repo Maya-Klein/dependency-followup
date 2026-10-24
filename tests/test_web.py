@@ -627,7 +627,11 @@ def test_length_limit_through_the_page(client, app, kind, limit):
     assert ok.status_code == 303
     assert too_long.status_code == 400
     assert f"{limit + 1:,} תווים" in html and f"המותר הוא {limit:,}" in html
-    assert "לפצל לשני עדכונים" in html
+    assert "כל חלק כעדכון נפרד" in html
+    if kind == THREAD:
+        assert "מיילים קודמים שמצוטטים שוב או חתימות" in html and "הטקסט ארוך מדי" in html
+    else:
+        assert "הסיכום ארוך מדי" in html and "מיילים קודמים" not in html
     assert "ב" * (limit + 1) in html  # the pasted text stays in the form
     assert "maxlength" not in html.split('name="content"')[1].split(">")[0]
     assert len(updates_of(app, topic_id)) == 1
@@ -695,8 +699,10 @@ def test_long_update_is_folded_with_the_full_text_inside_details(client, app, co
 
     html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
 
-    assert "<details>" in html and "הצגת הטקסט המלא" in html
-    assert content in html  # the full text is in the page, inside the fold
+    assert "הצגת הטקסט המלא" in html and 'class="fold-toggle"' in html
+    assert html.count("כיווץ") == 2  # a collapse label above the full text and one after it
+    assert content in html  # the full text is in the page, next to the excerpt
+    assert "<details>" not in html and "<script" not in html  # folding needs no JavaScript
 
 
 def test_line_breaks_are_kept_with_pre_wrap_and_no_extra_html(client, app):
@@ -831,3 +837,57 @@ def test_adding_and_deleting_an_update_with_a_valid_token(csrf_app):
 
     assert added.status_code == deleted.status_code == 303
     assert list_updates(csrf_app.config["ENGINE"], topic_id) == []
+
+
+def test_update_form_has_no_browser_validation_and_no_required_fields(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+    form = html.split('<form method="post" action="/topics/')[1].split("</form>")[0]
+
+    assert " novalidate" in form.split(">")[0]
+    assert "required" not in form
+    assert "maxlength" not in form
+
+
+def test_no_permanent_length_caption_under_the_content_field(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert "50,000" not in html and "5,000" not in html and "50000" not in html and "5000" not in html
+
+
+def test_radio_labels_come_from_one_place(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+
+    assert html.count("ציטוט מהתכתבות") == 1 and html.count("סיכום שיחה או פגישה") == 1
+
+
+def test_expanded_long_update_is_the_full_text_and_the_excerpt_is_hidden_by_css(client):
+    css = client.get("/static/style.css").get_data(as_text=True)
+
+    assert ".fold-toggle:checked ~ .excerpt" in css and ".fold-toggle:checked ~ .full" in css
+    assert "unicode-bidi: plaintext" in css  # each line takes its own direction
+
+
+def test_error_strip_is_quiet(client):
+    css = client.get("/static/style.css").get_data(as_text=True)
+    rule = next(line for line in css.splitlines() if line.startswith(".error {"))
+
+    assert "border-inline-start: 3px solid var(--err)" in rule
+    assert "color: var(--ink)" in rule and "color: var(--err)" not in rule
+
+
+def test_delete_update_page_shows_kind_and_warning_on_its_own_line(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, USER_SUMMARY, "סיכום קצר")
+    update_id = updates_of(app, topic_id)[0]["id"]
+
+    html = client.get(f"/topics/{topic_id}/updates/{update_id}/delete").get_data(as_text=True)
+
+    assert "סוג העדכון: סיכום שיחה או פגישה" in html
+    assert '<p class="confirm">אי אפשר לבטל את המחיקה.</p>' in html
+    assert "(סיכום)" not in html

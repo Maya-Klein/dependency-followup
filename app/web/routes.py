@@ -49,6 +49,18 @@ UPDATE_ERRORS = {
     "content_blank": "יש להזין את תוכן העדכון",
 }
 FUTURE_DATE_ERROR = "אי אפשר להזין תאריך עתידי"
+KIND_LABELS = {THREAD: "ציטוט מהתכתבות", USER_SUMMARY: "סיכום שיחה או פגישה"}
+TOO_LONG_ERRORS = {
+    THREAD: (
+        "הטקסט ארוך מדי: {length:,} תווים, והמותר הוא {limit:,}. "
+        "אפשר להסיר חלקים שחוזרים על עצמם, כמו מיילים קודמים שמצוטטים שוב או חתימות. "
+        "אפשר גם לחלק את הטקסט לשני חלקים ולשמור כל חלק כעדכון נפרד"
+    ),
+    USER_SUMMARY: (
+        "הסיכום ארוך מדי: {length:,} תווים, והמותר הוא {limit:,}. "
+        "אפשר לקצר אותו, או לחלק אותו לשני חלקים ולשמור כל חלק כעדכון נפרד"
+    ),
+}
 
 
 def _engine():
@@ -149,10 +161,7 @@ def _read_update_form(today):
         if str(exc) == "content_too_long":
             length = len(normalize_update_text(form["content"]))
             limit = MAX_UPDATE_LENGTHS[form["kind"]]
-            return form, None, None, None, (
-                f"הטקסט ארוך מדי: {length:,} תווים, והמותר הוא {limit:,}. "
-                "אפשר לקצר (למשל למחוק ציטוטים חוזרים או חתימות) או לפצל לשני עדכונים"
-            )
+            return form, None, None, None, TOO_LONG_ERRORS[form["kind"]].format(length=length, limit=limit)
         return form, None, None, None, UPDATE_ERRORS[str(exc)]
     return form, kind, content, entry_date, None
 
@@ -172,6 +181,7 @@ def _render_detail(topic, status=200, error=None, form=None):
         today=today,
         THREAD=THREAD,
         USER_SUMMARY=USER_SUMMARY,
+        KIND_LABELS=KIND_LABELS,
     )
     return html, status
 
@@ -234,7 +244,11 @@ def delete_update_confirm(topic_id, update_id):
     topic = _topic_or_404(topic_id)
     update = _update_or_404(topic_id, update_id)
     return render_template(
-        "update_delete.html", topic=topic, update=update, excerpt=excerpt(update["content"]), USER_SUMMARY=USER_SUMMARY
+        "update_delete.html",
+        topic=topic,
+        update=update,
+        excerpt=excerpt(update["content"]),
+        kind_label=KIND_LABELS[update["kind"]],
     )
 
 

@@ -11,7 +11,7 @@
 }
 :root {
   --bg: #F6F7F9; --card: #fff; --line: #E3E6EA; --ink: #1d2733; --muted: #5b6672;
-  --primary: #243447; --primary-hover: #34495f; --field: #C9CED6; --err: #D32F2F; --err-bg: #FDE7E7;
+  --primary: #243447; --primary-hover: #34495f; --field: #C9CED6; --err: #D32F2F; --err-bg: #FEF6F6;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.5 Rubik, system-ui, "Segoe UI", Arial, sans-serif; }
@@ -34,7 +34,8 @@ input:focus { outline: none; border: 2px solid var(--primary); padding: 0 11px; 
 input:user-invalid { border-color: var(--err); }
 button { font: inherit; font-weight: 500; min-height: 48px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; cursor: pointer; }
 button:hover { background: var(--primary-hover); }
-.error { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--err-bg); color: var(--err); font-weight: 500; }
+/* Quiet error strip: dark text, a thin red line at the start edge, a very light background */
+.error { margin: 0; padding: 8px 12px; border-radius: 8px; border-inline-start: 3px solid var(--err); background: var(--err-bg); color: var(--ink); }
 
 /* Topic cards */
 .topics { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
@@ -88,9 +89,9 @@ button.btn-danger { min-height: 48px; border: 1px solid var(--err); }
 .updates-section { display: grid; gap: 12px; margin-top: 24px; }
 .section-title { margin: 0; font-size: 18px; font-weight: 600; }
 .add-update { display: grid; }
-fieldset.radios { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
-.radios legend { padding: 0; margin-bottom: 4px; font-weight: 500; }
-.radios label { display: flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 400; }
+fieldset.radios { display: grid; gap: 0; margin: 0; padding: 0; border: 0; min-width: 0; }
+.radios legend { padding: 0; margin-bottom: 2px; font-weight: 500; }
+.radios label { display: flex; align-items: center; gap: 8px; min-height: 36px; font-weight: 400; }
 .radios input { min-height: 0; width: 20px; height: 20px; padding: 0; accent-color: var(--primary); }
 .updates { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
 .update { display: grid; gap: 6px; padding: 14px 16px; }
@@ -100,11 +101,20 @@ fieldset.radios { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; min
 .update-kind { font-weight: 500; }
 .update-delete { margin-inline-start: auto; color: var(--muted); text-decoration: none; }
 .update-delete:hover { color: var(--ink); text-decoration: underline; }
-.update-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.update-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: plaintext; }
+.update-kind-line { margin: 0; color: var(--muted); }
 .thread .update-body { padding-inline-start: 12px; border-inline-start: 2px solid var(--field); }
-.update-body details { margin-top: 4px; }
-.update-body summary { cursor: pointer; width: fit-content; color: var(--muted); font-size: 14px; font-weight: 500; }
-.update-body details[open] > summary { margin-bottom: 6px; }
+.add-update :user-invalid { border-color: var(--field); }
+/* Folding without JavaScript: the hidden checkbox is toggled by the labels; collapsed shows the excerpt, open shows only the full text */
+.fold { position: relative; display: grid; gap: 4px; }
+.fold-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; padding: 0; pointer-events: none; }
+.fold-label { cursor: pointer; width: fit-content; color: var(--muted); font-size: 14px; font-weight: 500; }
+.fold-label:hover { color: var(--ink); text-decoration: underline; }
+.fold-toggle:focus-visible ~ .fold-label { outline: 2px solid var(--primary); outline-offset: 2px; }
+.fold .full, .fold .collapse { display: none; }
+.fold-toggle:checked ~ .full { display: block; }
+.fold-toggle:checked ~ .collapse { display: block; }
+.fold-toggle:checked ~ .excerpt, .fold-toggle:checked ~ .expand { display: none; }
 
 @media (min-width: 900px) {
   main { max-width: 68rem; padding-top: 40px; }

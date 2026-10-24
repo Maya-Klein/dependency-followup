@@ -31,19 +31,21 @@
 
   <details class="add-update"{% if error %} open{% endif %}>
     <summary>+ הוספת עדכון</summary>
-    <form method="post" action="{{ url_for('main.add_update_route', topic_id=topic.id) }}">
+    {# novalidate: the browser's own messages are off; the server checks everything and answers in the page's own style #}
+    <form method="post" action="{{ url_for('main.add_update_route', topic_id=topic.id) }}" novalidate>
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
       <fieldset class="radios">
         <legend>סוג העדכון</legend>
-        <label><input type="radio" name="kind" value="{{ THREAD }}" required{% if form.kind == THREAD %} checked{% endif %}> ציטוט מהתכתבות</label>
-        <label><input type="radio" name="kind" value="{{ USER_SUMMARY }}" required{% if form.kind == USER_SUMMARY %} checked{% endif %}> סיכום שיחה או פגישה</label>
+        {% for value, label in KIND_LABELS.items() %}
+        <label><input type="radio" name="kind" value="{{ value }}"{% if form.kind == value %} checked{% endif %}> {{ label }}</label>
+        {% endfor %}
       </fieldset>
       <label>תוכן העדכון
-        <textarea name="content" rows="5" required>{{ form.content }}</textarea>
+        <textarea name="content" rows="5">{{ form.content }}</textarea>
       </label>
       <label>תאריך העדכון
-        <input type="date" name="entry_date" value="{{ form.entry }}" max="{{ today.isoformat() }}" required>
+        <input type="date" name="entry_date" value="{{ form.entry }}" max="{{ today.isoformat() }}">
       </label>
       <button type="submit">הוספת עדכון</button>
     </form>
@@ -60,15 +62,17 @@
         <a class="update-delete" href="{{ url_for('main.delete_update_confirm', topic_id=topic.id, update_id=u.id) }}">מחיקה</a>
       </div>
       {% if u.excerpt %}
-      <div class="update-body">
-        <p class="update-text" dir="auto">{{ u.excerpt }}</p>
-        <details>
-          <summary>הצגת הטקסט המלא</summary>
-          <p class="update-text" dir="auto">{{ u.content }}</p>
-        </details>
+      {# a long update folds with a hidden checkbox and labels, so it works without JavaScript #}
+      <div class="update-body fold">
+        <input type="checkbox" class="fold-toggle" id="fold-{{ u.id }}" aria-label="הצגת הטקסט המלא">
+        <label class="fold-label collapse collapse-top" for="fold-{{ u.id }}">כיווץ</label>
+        <p class="update-text excerpt">{{ u.excerpt }}</p>
+        <p class="update-text full">{{ u.content }}</p>
+        <label class="fold-label expand" for="fold-{{ u.id }}">הצגת הטקסט המלא</label>
+        <label class="fold-label collapse collapse-bottom" for="fold-{{ u.id }}">כיווץ</label>
       </div>
       {% else %}
-      <p class="update-text update-body" dir="auto">{{ u.content }}</p>
+      <p class="update-text update-body">{{ u.content }}</p>
       {% endif %}
     </li>
     {% endfor %}

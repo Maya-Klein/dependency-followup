@@ -184,3 +184,24 @@ def test_excerpt_cuts_many_lines():
 
     assert cut.count("\n") == EXCERPT_MAX_LINES - 1
     assert cut.endswith("שורה 8…")
+
+
+def test_excerpt_ends_with_ellipsis_when_cut_mid_text():
+    assert excerpt("שלום " * 200).endswith("שלום…")
+
+
+@pytest.mark.parametrize("mark", [".", "!", "?", ",", ":", ";", ")", '"', "…"])
+def test_excerpt_has_no_ellipsis_after_existing_punctuation(mark):
+    text = "א" * (EXCERPT_MAX_CHARS - 1) + mark + "ב" * 50
+
+    cut = excerpt(text)
+
+    assert cut == text[:EXCERPT_MAX_CHARS]
+    assert cut.endswith(mark) and not cut.endswith("……")
+
+
+def test_excerpt_checks_punctuation_after_trimming_trailing_whitespace():
+    lines = ["שורה."] + ["ש"] * 7 + ["עוד"]
+
+    assert excerpt("\n".join(lines)) == "\n".join(lines[:-1]) + "…"
+    assert excerpt("\n".join(["ש"] * 7 + ["סוף.", "עוד"])) == "\n".join(["ש"] * 7 + ["סוף."])
