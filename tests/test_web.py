@@ -616,7 +616,7 @@ def test_invalid_entry_date_is_rejected(client, app, entry):
     assert updates_of(app, topic_id) == []
 
 
-@pytest.mark.parametrize("kind, limit", [(THREAD, 50000), (USER_SUMMARY, 5000)])
+@pytest.mark.parametrize("kind, limit", [(THREAD, 200000), (USER_SUMMARY, 5000)])
 def test_length_limit_through_the_page(client, app, kind, limit):
     topic_id = add(app)
 
@@ -627,11 +627,11 @@ def test_length_limit_through_the_page(client, app, kind, limit):
     assert ok.status_code == 303
     assert too_long.status_code == 400
     assert f"{limit + 1:,} תווים" in html and f"המותר הוא {limit:,}" in html
-    assert "כל חלק כעדכון נפרד" in html
     if kind == THREAD:
-        assert "מיילים קודמים שמצוטטים שוב או חתימות" in html and "הטקסט ארוך מדי" in html
+        assert "השרשור ארוך מדי לשמירה" in html
+        assert "לחלק" not in html and "מיילים קודמים" not in html  # no advice: saving the whole thread matters more
     else:
-        assert "הסיכום ארוך מדי" in html and "מיילים קודמים" not in html
+        assert "הסיכום ארוך מדי" in html and "כל חלק כעדכון נפרד" in html and "מיילים קודמים" not in html
     assert "ב" * (limit + 1) in html  # the pasted text stays in the form
     assert "maxlength" not in html.split('name="content"')[1].split(">")[0]
     assert len(updates_of(app, topic_id)) == 1
@@ -700,7 +700,8 @@ def test_long_update_is_folded_with_the_full_text_inside_details(client, app, co
     html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
 
     assert "הצגת הטקסט המלא" in html and 'class="fold-toggle"' in html
-    assert html.count("כיווץ") == 2  # a collapse label above the full text and one after it
+    assert html.count("הצגה מקוצרת") == 2  # a label above the full text and one after it
+    assert "כיווץ" not in html
     assert content in html  # the full text is in the page, next to the excerpt
     assert "<details>" not in html and "<script" not in html  # folding needs no JavaScript
 
@@ -855,7 +856,8 @@ def test_no_permanent_length_caption_under_the_content_field(client, app):
 
     html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
 
-    assert "50,000" not in html and "5,000" not in html and "50000" not in html and "5000" not in html
+    for number in ("200,000", "200000", "5,000", "5000"):
+        assert number not in html
 
 
 def test_radio_labels_come_from_one_place(client, app):
@@ -888,6 +890,45 @@ def test_delete_update_page_shows_kind_and_warning_on_its_own_line(client, app):
 
     html = client.get(f"/topics/{topic_id}/updates/{update_id}/delete").get_data(as_text=True)
 
-    assert "סוג העדכון: סיכום שיחה או פגישה" in html
-    assert '<p class="confirm">אי אפשר לבטל את המחיקה.</p>' in html
-    assert "(סיכום)" not in html
+    question = html.index('<p class="confirm-question">')
+    warning = html.index('<p class="confirm-warning">אי אפשר לבטל את המחיקה.</p>')
+    preview = html.index("update-preview")
+    buttons = html.index('<div class="form-actions">')
+
+    assert question < warning < preview < buttons  # question, then the small warning, then the update, then the buttons
+    assert '<span class="update-kind">סיכום שיחה או פגישה</span>' in html and "סיכום קצר" in html
+    assert "<bdi>" + date(2026, 10, 17).strftime("%d.%m.%Y") + "</bdi>" in html
+
+
+def test_open_update_form_has_a_label_swap_and_a_cancel_link_without_javascript(client, app):
+    topic_id = add(app)
+
+    html = client.get(f"/topics/{topic_id}").get_data(as_text=True)
+    form = html.split('<form method="post" action="/topics/')[1].split("</form>")[0]
+    css = client.get("/static/style.css").get_data(as_text=True)
+
+    assert '<span class="when-closed">+ הוספת עדכון</span><span class="when-open">סגירה</span>' in html
+    assert f'<a class="cancel" href="/topics/{topic_id}#updates">ביטול</a>' in form
+    assert ".add-update[open] .when-closed { display: none; }" in css
+    assert "<script" not in html
+
+
+def test_delete_update_page_has_cancel_back_to_the_topic(client, app):
+    topic_id = add(app)
+    post_update(client, topic_id, THREAD, "טקסט")
+    update_id = updates_of(app, topic_id)[0]["id"]
+
+    html = client.get(f"/topics/{topic_id}/updates/{update_id}/delete").get_data(as_text=True)
+
+    assert f'<a class="cancel" href="/topics/{topic_id}">ביטול</a>' in html
+
+
+@pytest.mark.parametrize("char", ["א", "😀", "a" + chr(10)])
+def test_a_200000_character_thread_is_saved_whole_in_any_script(client, app, char):
+    topic_id = add(app)
+    thread = (char * 200000)[:200000]
+
+    resp = post_update(client, topic_id, THREAD, thread)
+
+    assert resp.status_code == 303  # also fits MAX_CONTENT_LENGTH and MAX_FORM_MEMORY_SIZE
+    assert updates_of(app, topic_id)[0]["content"] == thread.strip()

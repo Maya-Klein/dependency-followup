@@ -11,7 +11,8 @@ MAX_OUTCOME_LENGTH = 2000
 # By form, not by channel: pasted written text vs. the user's own words about something said aloud
 THREAD = "thread"
 USER_SUMMARY = "user_summary"
-MAX_UPDATE_LENGTHS = {THREAD: 50000, USER_SUMMARY: 5000}
+# The thread limit only guards against a huge paste; saving a whole thread matters more than keeping it short
+MAX_UPDATE_LENGTHS = {THREAD: 200000, USER_SUMMARY: 5000}
 
 
 def clean_topic_fields(title, required_outcome):

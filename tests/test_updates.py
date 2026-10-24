@@ -81,8 +81,8 @@ def test_length_limit_boundary(engine, topic_id, kind):
     assert len(list_updates(engine, topic_id)) == 1
 
 
-def test_limits_are_50000_for_thread_and_5000_for_summary():
-    assert MAX_UPDATE_LENGTHS == {THREAD: 50000, USER_SUMMARY: 5000}
+def test_limits_are_200000_for_thread_and_5000_for_summary():
+    assert MAX_UPDATE_LENGTHS == {THREAD: 200000, USER_SUMMARY: 5000}
 
 
 def test_text_is_trimmed_and_line_breaks_normalised_but_otherwise_kept(engine, topic_id):

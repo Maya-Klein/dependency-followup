@@ -51,11 +51,7 @@ UPDATE_ERRORS = {
 FUTURE_DATE_ERROR = "אי אפשר להזין תאריך עתידי"
 KIND_LABELS = {THREAD: "ציטוט מהתכתבות", USER_SUMMARY: "סיכום שיחה או פגישה"}
 TOO_LONG_ERRORS = {
-    THREAD: (
-        "הטקסט ארוך מדי: {length:,} תווים, והמותר הוא {limit:,}. "
-        "אפשר להסיר חלקים שחוזרים על עצמם, כמו מיילים קודמים שמצוטטים שוב או חתימות. "
-        "אפשר גם לחלק את הטקסט לשני חלקים ולשמור כל חלק כעדכון נפרד"
-    ),
+    THREAD: "השרשור ארוך מדי לשמירה: {length:,} תווים, והמותר הוא {limit:,}",
     USER_SUMMARY: (
         "הסיכום ארוך מדי: {length:,} תווים, והמותר הוא {limit:,}. "
         "אפשר לקצר אותו, או לחלק אותו לשני חלקים ולשמור כל חלק כעדכון נפרד"
@@ -249,6 +245,7 @@ def delete_update_confirm(topic_id, update_id):
         update=update,
         excerpt=excerpt(update["content"]),
         kind_label=KIND_LABELS[update["kind"]],
+        THREAD=THREAD,
     )
 
 

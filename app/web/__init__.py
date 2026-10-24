@@ -20,7 +20,8 @@ def create_app(database_url=None):
     if not secret_key:
         raise RuntimeError("SECRET_KEY is not set: copy .env.example to .env and set a value")
     app.config["SECRET_KEY"] = secret_key
-    app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024  # a pasted thread is at most 50,000 characters; refuse far more
+    # A form-encoded 200,000-character thread is ~1.2 MB in Hebrew and ~2.4 MB in emoji; refuse far more.
+    app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 * 1024
     app.config["WTF_CSRF_TIME_LIMIT"] = None  # token lives as long as the session
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     csrf.init_app(app)

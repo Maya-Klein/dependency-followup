@@ -85,6 +85,11 @@ button.btn-danger { min-height: 48px; border: 1px solid var(--err); }
 .cancel { border-color: transparent; color: var(--muted); }
 .confirm { margin: 0; overflow-wrap: anywhere; }
 
+/* The update form's summary says "+ הוספת עדכון" when closed and "סגירה" when open */
+.add-update .when-open, .add-update[open] .when-closed { display: none; }
+.add-update[open] .when-open { display: inline; }
+.form-actions { display: flex; align-items: center; gap: 12px; }
+.form-actions button { flex: 1; }
 /* Update history: newest first; a pasted thread is marked only by the line at its start edge, a summary by the word "סיכום" */
 .updates-section { display: grid; gap: 12px; margin-top: 24px; }
 .section-title { margin: 0; font-size: 18px; font-weight: 600; }
@@ -102,7 +107,9 @@ fieldset.radios { display: grid; gap: 0; margin: 0; padding: 0; border: 0; min-w
 .update-delete { margin-inline-start: auto; color: var(--muted); text-decoration: none; }
 .update-delete:hover { color: var(--ink); text-decoration: underline; }
 .update-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: plaintext; }
-.update-kind-line { margin: 0; color: var(--muted); }
+.confirm-question { margin: 0; font-size: 20px; font-weight: 600; }
+.confirm-warning { margin: 0; font-size: 14px; color: var(--muted); }
+.update-preview { border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
 .thread .update-body { padding-inline-start: 12px; border-inline-start: 2px solid var(--field); }
 .add-update :user-invalid { border-color: var(--field); }
 /* Folding without JavaScript: the hidden checkbox is toggled by the labels; collapsed shows the excerpt, open shows only the full text */
