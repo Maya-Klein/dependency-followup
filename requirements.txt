@@ -4,3 +4,4 @@ tzdata
 pytest
 flask-wtf
 python-dotenv
+anthropic==2.6.0
