@@ -1,15 +1,35 @@
+import copy
 from collections import namedtuple
 from datetime import date
 
 import pytest
 
 from app.core.analysis import (
+    COMMITMENT,
+    CONFIRMED,
+    DECISION,
     DIRECTION_CONTROLS,
+    KIND_THREAD,
+    KIND_USER_SUMMARY,
+    MISSING,
+    NO_LONGER_REQUIRED,
+    NOTE_NO_SUPPORT,
+    NOTE_QUOTE_NOT_FOUND,
+    OPINION,
+    OTHER,
+    OURS,
+    PROCEEDING,
+    REPORTED,
+    REPORTED_DONE,
+    UNCLEAR,
+    WRITTEN,
+    enforce_states,
     normalize_for_match,
     quote_in_record,
     select_updates,
     strip_direction_controls,
 )
+from app.storage.repository import THREAD, USER_SUMMARY
 
 # Invisible characters are always written as visible escapes in this file.
 RLO = chr(0x202E)  # U+202E, right-to-left override
@@ -234,3 +254,136 @@ def test_no_updates():
 def test_ceiling_smaller_than_the_newest_update_raises():
     with pytest.raises(ValueError):
         select_updates([upd(1, 1, 10), upd(2, 2, 101)], 100)
+
+
+# --- enforce_states ---
+
+Record = namedtuple("Record", "id kind content")
+
+RECORDS = [
+    Record(1, KIND_THREAD, "גיל כתב: הארגזים הגיעו ואנחנו מאשרים את המשלוח"),
+    Record(2, KIND_USER_SUMMARY, "עמית אמר בטלפון שהפסל נארז"),
+    Record(3, KIND_THREAD, "החלטנו להתקדם גם בלי תעודת הביטוח"),
+]
+
+Q1 = "אנחנו מאשרים את המשלוח"  # in record 1
+Q2 = "הפסל נארז"  # in record 2
+Q3 = "החלטנו להתקדם"  # in record 3
+
+
+def finding(tag, who, update_id, quote):
+    return {"tag": tag, "who": who, "update_id": update_id, "quote": quote}
+
+
+def item(state, *findings):
+    return {"name": "פריט", "state": state, "findings": list(findings)}
+
+
+def run_one(state, *findings):
+    return enforce_states([item(state, *findings)], RECORDS)[0]
+
+
+def test_kind_constants_match_storage():
+    assert KIND_THREAD == THREAD
+    assert KIND_USER_SUMMARY == USER_SUMMARY
+
+
+@pytest.mark.parametrize(
+    "state, f",
+    [
+        (CONFIRMED, finding(WRITTEN, OTHER, 1, Q1)),
+        (REPORTED_DONE, finding(REPORTED, OTHER, 2, Q2)),
+        (REPORTED_DONE, finding(WRITTEN, OTHER, 1, Q1)),
+        (NO_LONGER_REQUIRED, finding(DECISION, OURS, 3, Q3)),
+        (PROCEEDING, finding(DECISION, OURS, 2, Q2)),
+    ],
+    ids=["confirmed", "reported-by-reported", "reported-by-written", "no-longer", "proceeding-from-summary"],
+)
+def test_state_with_a_verified_supporting_finding_stays(state, f):
+    row = run_one(state, f)
+    assert row["state"] == state
+    assert row["note"] is None
+    assert row["findings"][0]["verified"] is True
+
+
+@pytest.mark.parametrize("who", [OURS, UNCLEAR])
+def test_confirmed_needs_the_other_side_as_writer(who):
+    row = run_one(CONFIRMED, finding(WRITTEN, who, 1, Q1))
+    assert row["state"] == MISSING
+    assert row["note"] == NOTE_NO_SUPPORT
+
+
+def test_written_from_a_user_summary_counts_as_reported():
+    f = finding(WRITTEN, OTHER, 2, Q2)
+    row = run_one(REPORTED_DONE, f)
+    assert row["state"] == REPORTED_DONE
+    assert row["findings"][0]["effective_tag"] == REPORTED
+    row = run_one(CONFIRMED, f)
+    assert row["state"] == MISSING
+    assert row["note"] == NOTE_NO_SUPPORT
+
+
+@pytest.mark.parametrize("tag", [OPINION, COMMITMENT])
+@pytest.mark.parametrize("state", [CONFIRMED, REPORTED_DONE, NO_LONGER_REQUIRED, PROCEEDING])
+def test_opinion_and_commitment_support_no_state(state, tag):
+    row = run_one(state, finding(tag, OTHER, 1, Q1))
+    assert row["state"] == MISSING
+    assert row["note"] == NOTE_NO_SUPPORT
+
+
+def test_quote_not_found_marks_unverified_and_drops():
+    row = run_one(CONFIRMED, finding(WRITTEN, OTHER, 1, "המשלוח הושלם"))
+    assert row["state"] == MISSING
+    assert row["note"] == NOTE_QUOTE_NOT_FOUND
+    assert row["findings"][0]["verified"] is False
+
+
+def test_quote_from_another_record_is_not_verified():
+    row = run_one(REPORTED_DONE, finding(REPORTED, OTHER, 2, Q1))
+    assert row["findings"][0]["verified"] is False
+    assert row["state"] == MISSING
+    assert row["note"] == NOTE_QUOTE_NOT_FOUND
+
+
+def test_one_verified_finding_is_enough():
+    row = run_one(
+        REPORTED_DONE,
+        finding(REPORTED, OTHER, 2, "משהו שלא נאמר"),
+        finding(REPORTED, OTHER, 2, Q2),
+    )
+    assert row["state"] == REPORTED_DONE
+    assert [f["verified"] for f in row["findings"]] == [False, True]
+
+
+def test_unknown_update_id_is_unverified():
+    row = run_one(REPORTED_DONE, finding(REPORTED, OTHER, 99, Q2))
+    assert row["findings"][0]["verified"] is False
+    assert row["state"] == MISSING
+    assert row["note"] == NOTE_QUOTE_NOT_FOUND
+
+
+def test_missing_is_never_raised():
+    row = run_one(MISSING, finding(WRITTEN, OTHER, 1, Q1), finding(DECISION, OURS, 3, Q3))
+    assert row["state"] == MISSING
+    assert row["note"] is None
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        item("done", finding(WRITTEN, OTHER, 1, Q1)),
+        item(CONFIRMED, finding("rumour", OTHER, 1, Q1)),
+        item(CONFIRMED, finding(WRITTEN, "someone", 1, Q1)),
+    ],
+    ids=["state", "tag", "writer"],
+)
+def test_unknown_values_are_rejected(row):
+    with pytest.raises(ValueError):
+        enforce_states([row], RECORDS)
+
+
+def test_input_is_not_changed():
+    rows = [item(CONFIRMED, finding(WRITTEN, OURS, 1, Q1))]
+    before = copy.deepcopy(rows)
+    enforce_states(rows, RECORDS)
+    assert rows == before
