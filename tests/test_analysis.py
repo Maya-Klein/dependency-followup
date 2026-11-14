@@ -1,6 +1,11 @@
 import pytest
 
-from app.core.analysis import DIRECTION_CONTROLS, strip_direction_controls
+from app.core.analysis import (
+    DIRECTION_CONTROLS,
+    normalize_for_match,
+    quote_in_record,
+    strip_direction_controls,
+)
 
 # Invisible characters are always written as visible escapes in this file.
 RLO = chr(0x202E)  # U+202E, right-to-left override
@@ -51,3 +56,102 @@ def test_removed_keeps_order_and_repeats():
     clean, removed = strip_direction_controls(RLO + "א" + LRI + "ב" + RLO)
     assert clean == "אב"
     assert removed == [RLO, LRI, RLO]
+
+
+# --- quote_in_record and normalize_for_match ---
+
+GERSHAYIM = chr(0x05F4)  # U+05F4, Hebrew double quote
+GERESH = chr(0x05F3)  # U+05F3, Hebrew single quote
+CURLY = chr(0x2019)  # U+2019, right single quotation mark
+
+RECORD = "גיל כתב:\nהארגזים יגיעו ביום חמישי, ואז נארוז."
+
+
+def test_quote_found_word_for_word():
+    assert quote_in_record("הארגזים יגיעו ביום חמישי", RECORD)
+
+
+def test_quote_not_in_record():
+    assert not quote_in_record("המשלוח הושלם", RECORD)
+
+
+def test_quote_from_another_record_is_not_found_here():
+    other = "עמית דיווח בטלפון שהפסל נארז."
+    assert quote_in_record("הפסל נארז", other)
+    assert not quote_in_record("הפסל נארז", RECORD)
+
+
+def test_partial_quote_counts():
+    assert quote_in_record("יגיעו ביום", RECORD)
+
+
+def test_reply_markers_in_record_are_ignored():
+    record = "> > הארגזים יגיעו\n> ביום חמישי\nתודה"
+    assert quote_in_record("הארגזים יגיעו ביום חמישי", record)
+    assert quote_in_record("> הארגזים יגיעו", record)
+
+
+def test_line_breaks_and_extra_spaces_are_unified():
+    record = "הארגזים   יגיעו\r\nביום\n\n חמישי"
+    assert quote_in_record("הארגזים יגיעו ביום חמישי", record)
+
+
+@pytest.mark.parametrize("mark", [RLO, LRM, RLM], ids=["RLO", "LRM", "RLM"])
+def test_direction_characters_do_not_matter(mark):
+    assert quote_in_record("ביום" + mark + " חמישי", RECORD)
+    assert quote_in_record("ביום חמישי", "ביום" + mark + " חמישי")
+
+
+def test_gershayim_equals_plain_double_quote():
+    with_gershayim = "הוא אמר " + GERSHAYIM + "בסדר" + GERSHAYIM
+    assert quote_in_record('הוא אמר "בסדר"', with_gershayim)
+    assert quote_in_record(with_gershayim, 'הוא אמר "בסדר"')
+
+
+def test_geresh_equals_plain_single_quote():
+    assert quote_in_record("צ" + GERESH + "ק", "הגיע צ'ק")
+    assert quote_in_record("צ'ק", "הגיע צ" + GERESH + "ק")
+
+
+def test_curly_apostrophe_equals_plain_single_quote():
+    assert quote_in_record("it" + CURLY + "s done", "Gil: it's done")
+    assert quote_in_record("it's done", "Gil: it" + CURLY + "s done")
+
+
+def test_left_curly_double_quote_equals_plain_double_quote():
+    record = "הוא אמר " + chr(0x201C) + "בסדר" + chr(0x201D)
+    assert quote_in_record('הוא אמר "בסדר"', record)
+    assert quote_in_record(record, 'הוא אמר "בסדר"')
+
+
+def test_right_curly_double_quote_equals_plain_double_quote():
+    assert quote_in_record('בסדר"', "הוא אמר בסדר" + chr(0x201D))
+    assert quote_in_record("בסדר" + chr(0x201D), 'הוא אמר בסדר"')
+
+
+def test_left_curly_single_quote_equals_plain_single_quote():
+    assert quote_in_record("say 'ok", "Gil: say " + chr(0x2018) + "ok")
+    assert quote_in_record("say " + chr(0x2018) + "ok", "Gil: say 'ok")
+
+
+def test_empty_or_blank_quote_never_passes():
+    assert not quote_in_record("", RECORD)
+    assert not quote_in_record("  \n ", RECORD)
+    assert not quote_in_record("", "")
+
+
+def test_case_matters_in_english():
+    assert quote_in_record("Crates arrived", "Gil: Crates arrived today")
+    assert not quote_in_record("crates arrived", "Gil: Crates arrived today")
+
+
+def test_hebrew_english_emoji_mix():
+    record = "Gil: ציוד האריזה הגיע 👍 thanks!"
+    assert quote_in_record("הגיע 👍 thanks", record)
+
+
+def test_normalize_is_idempotent():
+    messy = "> > א" + RLO + "  ב\r\n" + LRM + "> ג" + GERSHAYIM
+    once = normalize_for_match(messy)
+    assert normalize_for_match(once) == once
+    assert once == 'א ב ג"'

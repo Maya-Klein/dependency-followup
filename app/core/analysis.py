@@ -1,8 +1,27 @@
+import re
+
 # Characters that reorder how text is displayed (embeddings, overrides, isolates).
-# LRM/RLM (U+200E/U+200F) are harmless marks common in Hebrew text, so they stay.
+# LRM/RLM (U+200E/U+200F) are harmless marks common in Hebrew text, so they stay
+# in stored and displayed text, and are dropped only when comparing quotes.
 DIRECTION_CONTROLS = frozenset(
     chr(c) for c in (*range(0x202A, 0x202F), *range(0x2066, 0x206A))
 )
+DIRECTION_MARKS = (chr(0x200E), chr(0x200F))  # LRM, RLM
+
+# Hebrew gershayim and geresh, and the curly quotes and apostrophes, count as
+# the plain marks.
+_QUOTE_MARKS = str.maketrans(
+    {
+        chr(0x05F4): '"',  # Hebrew gershayim
+        chr(0x201C): '"',  # left double quotation mark
+        chr(0x201D): '"',  # right double quotation mark
+        chr(0x05F3): "'",  # Hebrew geresh
+        chr(0x2018): "'",  # left single quotation mark
+        chr(0x2019): "'",  # right single quotation mark
+    }
+)
+# Reply markers at the start of a line: "> ", "> > ", ">>".
+_REPLY_MARKERS = re.compile(r"^[ \t]*(?:>[ \t]*)+", re.MULTILINE)
 
 
 def strip_direction_controls(text):
@@ -17,3 +36,31 @@ def strip_direction_controls(text):
         return text, []
     clean = "".join(ch for ch in text if ch not in DIRECTION_CONTROLS)
     return clean, removed
+
+
+def normalize_for_match(text):
+    """Prepare text for quote comparison; used on the quote and on the record alike.
+
+    Drops direction controls (including LRM and RLM) and reply markers at line
+    starts, treats the Hebrew and plain quote marks as equal, and collapses all
+    whitespace to single spaces.
+    """
+    text, _ = strip_direction_controls(text)
+    for mark in DIRECTION_MARKS:
+        text = text.replace(mark, "")
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = _REPLY_MARKERS.sub("", text)
+    text = text.translate(_QUOTE_MARKS)
+    return " ".join(text.split())
+
+
+def quote_in_record(quote, record_text):
+    """True if the quote appears word for word inside this one record.
+
+    Any continuous part of the record counts, so a very short quote can pass
+    without proving much (a risk to measure in PR C). An empty quote never passes.
+    """
+    wanted = normalize_for_match(quote)
+    if not wanted:
+        return False
+    return wanted in normalize_for_match(record_text)
