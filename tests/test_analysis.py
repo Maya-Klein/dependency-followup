@@ -1,4 +1,5 @@
 import copy
+import unicodedata
 from collections import namedtuple
 from datetime import date
 
@@ -124,6 +125,18 @@ def test_line_breaks_and_extra_spaces_are_unified():
 def test_direction_characters_do_not_matter(mark):
     assert quote_in_record("ביום" + mark + " חמישי", RECORD)
     assert quote_in_record("ביום חמישי", "ביום" + mark + " חמישי")
+
+
+@pytest.mark.parametrize(
+    "ch",
+    [chr(0x200B), chr(0xFEFF), chr(0x2060), chr(0x061C)],
+    ids=["ZWSP", "BOM", "word-joiner", "ALM"],
+)
+def test_every_invisible_format_character_is_ignored(ch):
+    assert unicodedata.category(ch) == "Cf"
+    assert quote_in_record("ביום חמישי", "ביום" + ch + " חמישי")
+    assert quote_in_record("ביום" + ch + " חמישי", "ביום חמישי")
+    assert quote_in_record(ch + "הארגזים יגיעו", RECORD)
 
 
 def test_gershayim_equals_plain_double_quote():
@@ -378,6 +391,35 @@ def test_missing_is_never_raised():
     ids=["state", "tag", "writer"],
 )
 def test_unknown_values_are_rejected(row):
+    with pytest.raises(ValueError):
+        enforce_states([row], RECORDS)
+
+
+def good_finding(**changes):
+    return {**finding(WRITTEN, OTHER, 1, Q1), **changes}
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        "not a dict",
+        {"findings": []},
+        {"state": CONFIRMED},
+        {"state": CONFIRMED, "findings": None},
+        {"state": CONFIRMED, "findings": "text"},
+        {"state": ["x"], "findings": []},
+        {"state": CONFIRMED, "findings": ["not a dict"]},
+        {"state": CONFIRMED, "findings": [{"tag": WRITTEN, "who": OTHER, "update_id": 1}]},
+        {"state": CONFIRMED, "findings": [good_finding(quote=None)]},
+        {"state": CONFIRMED, "findings": [good_finding(quote=5)]},
+        {"state": CONFIRMED, "findings": [good_finding(update_id=[1])]},
+        {"state": CONFIRMED, "findings": [good_finding(update_id="1")]},
+        {"state": CONFIRMED, "findings": [good_finding(update_id=True)]},
+        {"state": CONFIRMED, "findings": [good_finding(tag=None)]},
+        {"state": CONFIRMED, "findings": [good_finding(who=["ours"])]},
+    ],
+)
+def test_malformed_rows_are_rejected_with_value_error(row):
     with pytest.raises(ValueError):
         enforce_states([row], RECORDS)
 

@@ -1,12 +1,13 @@
 import re
+import unicodedata
 
 # Characters that reorder how text is displayed (embeddings, overrides, isolates).
 # LRM/RLM (U+200E/U+200F) are harmless marks common in Hebrew text, so they stay
-# in stored and displayed text, and are dropped only when comparing quotes.
+# in stored and displayed text; only quote comparison drops them, together with
+# every other invisible format (Cf) character.
 DIRECTION_CONTROLS = frozenset(
     chr(c) for c in (*range(0x202A, 0x202F), *range(0x2066, 0x206A))
 )
-DIRECTION_MARKS = (chr(0x200E), chr(0x200F))  # LRM, RLM
 
 # Hebrew gershayim and geresh, and the curly quotes and apostrophes, count as
 # the plain marks.
@@ -41,13 +42,12 @@ def strip_direction_controls(text):
 def normalize_for_match(text):
     """Prepare text for quote comparison; used on the quote and on the record alike.
 
-    Drops direction controls (including LRM and RLM) and reply markers at line
-    starts, treats the Hebrew and plain quote marks as equal, and collapses all
-    whitespace to single spaces.
+    Drops every invisible format character (Unicode category Cf: direction
+    controls, LRM and RLM, zero-width space, BOM and the like) and reply markers
+    at line starts, treats the Hebrew, curly and plain quote marks as equal, and
+    collapses all whitespace to single spaces.
     """
-    text, _ = strip_direction_controls(text)
-    for mark in DIRECTION_MARKS:
-        text = text.replace(mark, "")
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
     text = text.replace("\r\n", "\n").replace("\r", "\n")
     text = _REPLY_MARKERS.sub("", text)
     text = text.translate(_QUOTE_MARKS)
@@ -160,13 +160,25 @@ def _fits(state, finding, kind):
 
 
 def _check_values(item):
-    if item["state"] not in STATES:
-        raise ValueError(f"unknown state: {item['state']!r}")
+    """Reject a malformed row with ValueError, whatever the model sent."""
+    if not isinstance(item, dict):
+        raise ValueError("row is not an object")
+    if not isinstance(item.get("state"), str) or item["state"] not in STATES:
+        raise ValueError(f"unknown state: {item.get('state')!r}")
+    if not isinstance(item.get("findings"), list):
+        raise ValueError("findings is not a list")
     for finding in item["findings"]:
-        if finding["tag"] not in TAGS:
-            raise ValueError(f"unknown tag: {finding['tag']!r}")
-        if finding["who"] not in WHO_WROTE:
-            raise ValueError(f"unknown writer: {finding['who']!r}")
+        if not isinstance(finding, dict):
+            raise ValueError("finding is not an object")
+        if not isinstance(finding.get("tag"), str) or finding["tag"] not in TAGS:
+            raise ValueError(f"unknown tag: {finding.get('tag')!r}")
+        if not isinstance(finding.get("who"), str) or finding["who"] not in WHO_WROTE:
+            raise ValueError(f"unknown writer: {finding.get('who')!r}")
+        if not isinstance(finding.get("quote"), str):
+            raise ValueError("quote is not text")
+        update_id = finding.get("update_id")
+        if isinstance(update_id, bool) or not isinstance(update_id, int):
+            raise ValueError("update_id is not a whole number")
 
 
 def enforce_states(items, updates):
