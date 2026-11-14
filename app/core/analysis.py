@@ -64,3 +64,30 @@ def quote_in_record(quote, record_text):
     if not wanted:
         return False
     return wanted in normalize_for_match(record_text)
+
+
+def select_updates(updates, max_chars):
+    """Choose which updates go to the analysis, within a total length ceiling.
+
+    Each update needs .id, .entry_date and .content. Returns (selected, not_read):
+    selected is oldest to newest, ordered by entry_date and then id (created_at is
+    not used). When the total is too long the oldest updates are dropped whole,
+    never cut in the middle, and not_read lists them as (id, entry_date) pairs.
+    The newest update always goes in whole; if it alone exceeds max_chars the
+    ceiling is wrong, so this raises instead of cutting silently.
+    """
+    ordered = sorted(updates, key=lambda u: (u.entry_date, u.id))
+    if not ordered:
+        return [], []
+    if len(ordered[-1].content) > max_chars:
+        raise ValueError("max_chars is smaller than the newest update")
+    total = 0
+    start = len(ordered)
+    for i in range(len(ordered) - 1, -1, -1):
+        size = len(ordered[i].content)
+        if total + size > max_chars:
+            break
+        total += size
+        start = i
+    not_read = [(u.id, u.entry_date) for u in ordered[:start]]
+    return ordered[start:], not_read

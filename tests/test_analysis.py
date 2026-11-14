@@ -1,9 +1,13 @@
+from collections import namedtuple
+from datetime import date
+
 import pytest
 
 from app.core.analysis import (
     DIRECTION_CONTROLS,
     normalize_for_match,
     quote_in_record,
+    select_updates,
     strip_direction_controls,
 )
 
@@ -155,3 +159,78 @@ def test_normalize_is_idempotent():
     once = normalize_for_match(messy)
     assert normalize_for_match(once) == once
     assert once == 'א ב ג"'
+
+
+# --- select_updates ---
+
+Update = namedtuple("Update", "id entry_date content created_at")
+
+
+def upd(id, day, size, created_at=0):
+    return Update(id, date(2026, 11, day), "x" * size, created_at)
+
+
+def ids(updates):
+    return [u.id for u in updates]
+
+
+def test_everything_fits():
+    updates = [upd(1, 1, 10), upd(2, 2, 10)]
+    selected, not_read = select_updates(updates, 100)
+    assert ids(selected) == [1, 2]
+    assert not_read == []
+
+
+def test_sorted_by_entry_date_even_if_given_unsorted():
+    updates = [upd(3, 9, 5), upd(1, 2, 5), upd(2, 5, 5)]
+    selected, _ = select_updates(updates, 100)
+    assert ids(selected) == [1, 2, 3]
+
+
+def test_same_date_is_ordered_by_id():
+    updates = [upd(7, 4, 5), upd(5, 4, 5), upd(6, 4, 5)]
+    selected, _ = select_updates(updates, 100)
+    assert ids(selected) == [5, 6, 7]
+
+
+def test_created_at_does_not_affect_order():
+    updates = [upd(1, 1, 5, created_at=99), upd(2, 2, 5, created_at=1)]
+    selected, _ = select_updates(updates, 100)
+    assert ids(selected) == [1, 2]
+
+
+def test_over_the_ceiling_drops_the_oldest():
+    updates = [upd(1, 1, 40), upd(2, 2, 40), upd(3, 3, 40)]
+    selected, not_read = select_updates(updates, 100)
+    assert ids(selected) == [2, 3]
+    assert not_read == [(1, date(2026, 11, 1))]
+
+
+def test_update_that_does_not_fit_is_dropped_whole_and_older_ones_do_not_skip_past_it():
+    updates = [upd(1, 1, 10), upd(2, 2, 90), upd(3, 3, 20)]
+    selected, not_read = select_updates(updates, 100)
+    assert ids(selected) == [3]
+    assert [i for i, _ in not_read] == [1, 2]
+
+
+def test_newest_update_always_goes_in_whole():
+    updates = [upd(1, 1, 10), upd(2, 2, 100)]
+    selected, not_read = select_updates(updates, 100)
+    assert ids(selected) == [2]
+    assert len(selected[0].content) == 100
+    assert not_read == [(1, date(2026, 11, 1))]
+
+
+def test_not_read_has_id_and_date_oldest_first():
+    updates = [upd(1, 1, 30), upd(2, 2, 30), upd(3, 3, 30), upd(4, 4, 30)]
+    _, not_read = select_updates(updates, 60)
+    assert not_read == [(1, date(2026, 11, 1)), (2, date(2026, 11, 2))]
+
+
+def test_no_updates():
+    assert select_updates([], 100) == ([], [])
+
+
+def test_ceiling_smaller_than_the_newest_update_raises():
+    with pytest.raises(ValueError):
+        select_updates([upd(1, 1, 10), upd(2, 2, 101)], 100)
