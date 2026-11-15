@@ -190,6 +190,7 @@ def test_scenario_12_a_summary_is_never_confirmed_in_writing():
                           [finding("written", "other", 1, "8 קרטונים ארוזים")])])
     got = run(FakeClient(claimed), updates)["items"][0]
     assert got["state"] == "missing" and got["note"] == NOTE_NO_SUPPORT
+    assert got["model_state"] == "confirmed_in_writing"  # what the model said stays visible
     reported = output([row("קרטונים", "reported_done",
                            [finding("written", "other", 1, "8 קרטונים ארוזים")])])
     assert run(FakeClient(reported), updates)["items"][0]["state"] == "reported_done"

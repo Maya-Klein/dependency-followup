@@ -520,6 +520,11 @@ def analyze(client, required_outcome, deadline, updates, *, today, our_side, max
     except ValueError as e:
         raise AnalysisError("invalid_output", str(e), meta) from e
 
+    # Keep what the model said next to what the code decided, so the evaluation can
+    # count the rows that the code lowered.
+    for row, original in zip(items, data["items"]):
+        row["model_state"] = original["state"]
+
     return {
         "items": mark_duplicates(items, selected),
         "injection_warnings": warnings,
