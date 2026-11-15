@@ -1,0 +1,55 @@
+{
+  "rows": [
+    {
+      "name": "יוסי ברנע",
+      "match": [
+        "יוסי",
+        "ברנע"
+      ],
+      "state": "reported_done",
+      "missing_must": [
+        [
+          "הסכם"
+        ]
+      ]
+    },
+    {
+      "name": "Kunsthalle Nord",
+      "match": [
+        "Kunsthalle",
+        "קונסטהאל",
+        "מוזיאון"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "ביטוח",
+          "insurance"
+        ]
+      ],
+      "missing_must_not": [
+        "מחסום",
+        "שומר",
+        "barrier",
+        "guard"
+      ]
+    },
+    {
+      "name": "גלריה קו",
+      "match": [
+        "גלריה",
+        "גלריית",
+        "מיכל"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "הערות",
+          "הסכם",
+          "חתום",
+          "חתימה"
+        ]
+      ]
+    }
+  ]
+}

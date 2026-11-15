@@ -1,0 +1,81 @@
+{
+  "rows": [
+    {
+      "name": "1. הפגנת הסטודנטים",
+      "match": [
+        "הפגנ",
+        "סטודנט"
+      ],
+      "state": "confirmed_in_writing",
+      "missing_empty": true
+    },
+    {
+      "name": "2. נמל יפו בשחר",
+      "match": [
+        "נמל",
+        "יפו"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "האח",
+          "אחיה",
+          "יורש"
+        ],
+        [
+          "אישור",
+          "אשר"
+        ]
+      ]
+    },
+    {
+      "name": "3. חדר המתנה",
+      "match": [
+        "חדר המתנה",
+        "יואב",
+        "תיעוד"
+      ],
+      "state": "confirmed_in_writing",
+      "missing_empty": true
+    },
+    {
+      "name": "4. כרזה משנות ה-60",
+      "match": [
+        "כרזה",
+        "פוסטר"
+      ],
+      "state": "proceeding_without_full_confirmation",
+      "missing_must": [
+        [
+          "אישור",
+          "בעל הזכויות",
+          "בעלי הזכויות"
+        ]
+      ]
+    },
+    {
+      "name": "5. דימוי הים",
+      "match": [
+        "רקע הים",
+        "הים",
+        "דמות"
+      ],
+      "state": "proceeding_without_full_confirmation",
+      "missing_must": [
+        [
+          "אישור",
+          "בעל הזכויות",
+          "בעלי הזכויות"
+        ]
+      ]
+    },
+    {
+      "name": "6. דימוי המרפסת",
+      "match": [
+        "מרפסת"
+      ],
+      "state": "no_longer_required",
+      "missing_empty": true
+    }
+  ]
+}
