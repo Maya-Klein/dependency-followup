@@ -55,7 +55,8 @@
           "ביטוח",
           "insurance"
         ]
-      ]
+      ],
+      "may_be_not_assessable": true
     }
   ]
 }
