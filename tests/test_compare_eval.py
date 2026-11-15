@@ -52,10 +52,11 @@ def item(name, state, missing="", findings=(), model_state=None, note=None):
             "model_state": model_state or state, "note": note}
 
 
-def record(items, warnings=(), direction=()):
+def record(items, warnings=(), direction=(), not_assessable=()):
     return {
         "ok": True, "failure": None, "cost_usd": 0.02, "meta": {"seconds": 12.5},
-        "result": {"items": items, "injection_warnings": list(warnings), "not_assessable": [],
+        "result": {"items": items, "injection_warnings": list(warnings),
+                   "not_assessable": list(not_assessable),
                    "not_read": [], "direction_warnings": list(direction), "meta": {}},
     }
 
@@ -299,6 +300,89 @@ def test_a_record_saved_before_the_field_existed_counts_zero():
     assert s["direction_warnings"] == 0
     text = "\n".join(ce.render_topic("topic9", KEY, TOPIC, [("r1", s)], "improve"))
     assert "direction-control warnings: 0 update(s)" in text
+
+
+# --- rows that may be "not assessable" ---
+
+LRM = chr(0x200E)  # U+200E, left-to-right mark; written as a visible escape
+
+KEY_NA = ce.parse_answer_key(
+    {
+        "rows": [
+            {"name": "שם-סודי-א", "match": ["מסמך"], "state": "missing", "missing_must": [["חתימה"]]},
+            {"name": "שם-סודי-ג", "match": ["ביטוח", "תעודה"], "state": "missing", "may_be_not_assessable": True},
+        ]
+    },
+    "topic9",
+)
+DOC = item("המסמך", "missing", "חסרה חתימה")
+NA_TEXT = "העבודה של לנה: לא ניתן להעריך. האיסוף מותנה באישור תעודת הביטוח"
+
+
+def test_the_not_assessable_flag_defaults_to_false_and_must_be_a_boolean():
+    assert KEY["rows"][0]["may_be_not_assessable"] is False
+    assert KEY_NA["rows"][1]["may_be_not_assessable"] is True
+    with pytest.raises(ce.AnswerKeyError):
+        ce.parse_answer_key(
+            {"rows": [{"name": "a", "match": ["a"], "state": "missing", "may_be_not_assessable": "yes"}]}, "t")
+
+
+def test_a_row_the_model_listed_as_not_assessable_counts_as_correct():
+    s = ce.score_run(KEY_NA, TOPIC, record([DOC], not_assessable=[NA_TEXT]))
+    row = s["rows"][1]
+    assert row["matched"] is False and row["allowed_not_assessable"] is True
+    assert row["state_ok"] and row["missing_ok"]
+    assert row["not_assessable_hit"] == {"word": "ביטוח", "text": NA_TEXT}
+
+
+def test_the_match_is_found_after_normalization():
+    text = "לא ניתן להעריך את ביט" + LRM + "וח\n> התעודה"
+    s = ce.score_run(KEY_NA, TOPIC, record([DOC], not_assessable=[text]))
+    assert s["rows"][1]["allowed_not_assessable"] is True
+
+
+def test_a_flagged_row_that_was_not_mentioned_still_fails():
+    s = ce.score_run(KEY_NA, TOPIC, record([DOC], not_assessable=["משהו אחר"]))
+    assert s["rows"][1]["allowed_not_assessable"] is False
+    assert not s["rows"][1]["state_ok"] and not s["rows"][1]["missing_ok"]
+
+
+def test_without_the_flag_a_mention_does_not_help():
+    s = ce.score_run(KEY, TOPIC, record([item("המסמך", "missing", "חתימה אישור")],
+                                        not_assessable=["לא ניתן להעריך את התשלום"]))
+    assert s["rows"][1]["allowed_not_assessable"] is False and not s["rows"][1]["state_ok"]
+
+
+def test_when_the_model_did_write_a_row_the_usual_comparison_applies():
+    wrong = ce.score_run(KEY_NA, TOPIC, record([DOC, item("תעודת ביטוח", "reported_done")],
+                                               not_assessable=[NA_TEXT]))
+    assert wrong["rows"][1]["matched"] and not wrong["rows"][1]["allowed_not_assessable"]
+    assert wrong["rows"][1]["state_ok"] is False
+    right = ce.score_run(KEY_NA, TOPIC, record([DOC, item("תעודת ביטוח", "missing")]))
+    assert right["rows"][1]["state_ok"] and not right["rows"][1]["allowed_not_assessable"]
+
+
+def test_a_row_written_in_one_run_and_not_assessable_in_another_is_inconsistent():
+    written = ce.score_run(KEY_NA, TOPIC, record([DOC, item("תעודת ביטוח", "missing")]))
+    listed = ce.score_run(KEY_NA, TOPIC, record([DOC], not_assessable=[NA_TEXT]))
+    assert ce.inconsistent_rows(KEY_NA, [written, written]) == []
+    assert ce.inconsistent_rows(KEY_NA, [listed, listed]) == []
+    assert ce.inconsistent_rows(KEY_NA, [written, listed]) == [1]
+
+
+def test_improve_shows_only_the_number_and_final_shows_the_word_and_the_text():
+    labelled = [("r1", ce.score_run(KEY_NA, TOPIC, record([DOC], not_assessable=[NA_TEXT])))]
+    improve = "\n".join(ce.render_topic("topic9", KEY_NA, TOPIC, labelled, "improve"))
+    assert "not assessable (allowed): 1 row(s)" in improve
+    assert "state correct: 2/2" in improve and "key rows with no model row: 0" in improve
+    assert "שם-סודי-ג" not in improve and "ביטוח" not in improve
+    final = "\n".join(ce.render_topic("topic9", KEY_NA, TOPIC, labelled, "final"))
+    assert "שם-סודי-ג" in final and "'ביטוח'" in final and "תעודת הביטוח" in final
+
+
+def test_no_not_assessable_line_when_there_is_nothing_to_show():
+    labelled = [("r1", ce.score_run(KEY_NA, TOPIC, record([DOC, item("תעודת ביטוח", "missing")])))]
+    assert "not assessable (allowed)" not in "\n".join(ce.render_topic("topic9", KEY_NA, TOPIC, labelled, "final"))
 
 
 def test_normalization_time_is_measured_without_any_api():

@@ -20,8 +20,16 @@ Answer key, scripts/<topic>/<topic>_expected.json:
                "state": "missing",                     # one of the five states
                "missing_must": [["w1", "w2"], ["w3"]], # each group needs at least one of its words
                "missing_must_not": ["word"],           # none of these may appear
-               "missing_empty": false}],               # true: the "missing" text must be empty
+               "missing_empty": false,                 # true: the "missing" text must be empty
+               "may_be_not_assessable": false}],       # true: see below
      "warnings": {"min": 1, "max": 1, "quote_contains": ["word"]}}   # optional; default: none expected
+
+"may_be_not_assessable" (optional, default false): if no model row belongs to this key row, and
+one of its "match" words appears (after normalization) in a text the model listed under
+"not assessable", the row counts as correct and is reported separately as "not assessable
+(allowed)". If the model did write a row for it, the usual comparison applies. Match words are
+found anywhere inside the text, so a short word can match an unrelated text; in final mode the
+report shows the word and the text it matched.
 """
 import argparse
 import json
@@ -84,9 +92,12 @@ def parse_answer_key(data, name):
         empty = row.get("missing_empty", False)
         if not isinstance(empty, bool):
             raise AnswerKeyError(f"{where}: 'missing_empty' must be true or false")
+        maybe = row.get("may_be_not_assessable", False)
+        if not isinstance(maybe, bool):
+            raise AnswerKeyError(f"{where}: 'may_be_not_assessable' must be true or false")
         rows.append(
             {"name": row["name"], "match": match, "state": row["state"], "missing_must": must,
-             "missing_must_not": must_not, "missing_empty": empty}
+             "missing_must_not": must_not, "missing_empty": empty, "may_be_not_assessable": maybe}
         )
     warnings = data.get("warnings", {"min": 0, "max": 0})
     if (
@@ -157,6 +168,20 @@ def missing_matches(key_row, missing_text):
     if any(_has(text, w) for w in key_row["missing_must_not"]):
         return False
     return all(any(_has(text, w) for w in group) for group in key_row["missing_must"])
+
+
+def not_assessable_hit(key_row, texts):
+    """For a key row that may be "not assessable": the first match word found in one of the
+    model's not-assessable texts, as {"word", "text"}; None if the row is not allowed that or
+    nothing matches."""
+    if not key_row["may_be_not_assessable"]:
+        return None
+    for text in texts:
+        normalized = normalize_for_match(text)
+        for word in key_row["match"]:
+            if _has(normalized, word):
+                return {"word": word, "text": text}
+    return None
 
 
 def check_warnings(key, warnings):
@@ -241,12 +266,16 @@ def score_run(key, topic, record):
     for i, krow in enumerate(key["rows"]):
         j = pairs.get(i)
         if j is None:
+            hit = not_assessable_hit(krow, result.get("not_assessable", []))
             rows.append({"matched": False, "model_name": None, "state": None, "missing_text": None,
-                         "state_ok": False, "missing_ok": False})
+                         "allowed_not_assessable": hit is not None, "not_assessable_hit": hit,
+                         "state_ok": hit is not None, "missing_ok": hit is not None})
             continue
         model = items[j]
         rows.append({
             "matched": True,
+            "allowed_not_assessable": False,
+            "not_assessable_hit": None,
             "model_name": model["item"],
             "state": model["state"],
             "missing_text": model["missing"],
@@ -269,11 +298,14 @@ def score_run(key, topic, record):
 
 def inconsistent_rows(key, scored_runs):
     """Key rows whose model state is not the same in every successful run.
-    An unmatched row counts as its own value."""
+    An unmatched row, and a row the model listed as not assessable, each count as their own value."""
     good = [r for r in scored_runs if r["ok"]]
     result = []
     for i in range(len(key["rows"])):
-        values = {r["rows"][i]["state"] or "unmatched" for r in good}
+        values = {
+            "not_assessable" if r["rows"][i]["allowed_not_assessable"] else r["rows"][i]["state"] or "unmatched"
+            for r in good
+        }
         if len(values) > 1:
             result.append(i)
     return result
@@ -318,9 +350,21 @@ def render_topic(name, key, topic, labelled_scores, mode):
         return lines
     lines.append(f"   state correct: {_pct(sum(r['state_ok'] for s in good for r in s['rows']), rows_total)}")
     lines.append(f"   'what is missing' correct: {_pct(sum(r['missing_ok'] for s in good for r in s['rows']), rows_total)}")
-    lines.append(f"   key rows with no model row: {sum(not r['matched'] for s in good for r in s['rows'])}, "
+    lines.append(f"   key rows with no model row: "
+                 f"{sum(not r['matched'] and not r['allowed_not_assessable'] for s in good for r in s['rows'])}, "
                  f"extra model rows per run: {[s['extra_rows'] for s in good]}, "
                  f"ambiguous names: {sum(s['ambiguous'] for s in good)}")
+    allowed = sum(r["allowed_not_assessable"] for s in good for r in s["rows"])
+    if allowed:
+        lines.append(f"   not assessable (allowed): {allowed} row(s)")
+        if mode == "final":
+            for label, s in labelled_scores:
+                if not s["ok"]:
+                    continue
+                for i, r in enumerate(s["rows"]):
+                    if r["allowed_not_assessable"]:
+                        hit = r["not_assessable_hit"]
+                        lines.append(f"      {label}: {key['rows'][i]['name']!r} matched on {hit['word']!r} in: {hit['text']!r}")
     bad = inconsistent_rows(key, scored)
     lines.append("   consistency: " + ("consistent" if not bad else
                                      f"INCONSISTENT in {len(bad)} row(s) - run 2 more times"))
