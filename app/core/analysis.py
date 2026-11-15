@@ -1,5 +1,7 @@
 import json
 import re
+import secrets
+import time
 import unicodedata
 
 # The model and its effort live here and nowhere else (plan.md, decision 4).
@@ -439,3 +441,85 @@ def mark_duplicates(items, updates):
             findings.append({**f, "also_in_earlier": earlier})
         result.append({**item, "findings": findings})
     return result
+
+
+# --- the call (the client is passed in, so tests use a fake and core imports no SDK) ---
+
+
+class AnalysisError(Exception):
+    """The analysis did not produce a usable result.
+
+    reason is one of: "refusal", "max_tokens", "unexpected_stop", "invalid_output".
+    There is no automatic retry and no fallback model (plan.md, decisions 3 and 4);
+    the caller shows a message, and the evaluation counts it as a failure.
+    """
+
+    def __init__(self, reason, detail=""):
+        super().__init__(f"{reason}: {detail}" if detail else reason)
+        self.reason = reason
+        self.detail = detail
+
+
+def analyze(client, required_outcome, deadline, updates, *, today, our_side, max_chars, boundary=None):
+    """Analyse one topic's updates with one model call. Returns a dict:
+
+    items: the rows after enforce_states (states checked in code) and mark_duplicates;
+    injection_warnings: each with "verified"; not_assessable: texts;
+    not_read: (id, entry_date) pairs of updates cut for length;
+    meta: model, effort, stop_reason, tokens, seconds, request_id.
+
+    Only the updates that were sent to the model are used to check its quotes.
+    Raises AnalysisError (refusal, max_tokens, malformed output) and ValueError
+    (our_side empty, or the newest update longer than max_chars). Errors from the
+    API itself pass through unchanged.
+    """
+    selected, not_read = select_updates(updates, max_chars)
+    boundary = boundary or secrets.token_hex(4)
+    system = build_system_prompt(today, our_side, boundary)
+    message = build_user_message(required_outcome, deadline, selected, not_read, boundary)
+
+    started = time.monotonic()
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=MAX_TOKENS,
+        output_config={
+            "effort": EFFORT,
+            "format": {"type": "json_schema", "schema": OUTPUT_SCHEMA},
+        },
+        system=system,
+        messages=[{"role": "user", "content": message}],
+    )
+    seconds = time.monotonic() - started
+
+    stop = response.stop_reason
+    if stop == "refusal":
+        details = getattr(response, "stop_details", None)
+        raise AnalysisError("refusal", str(getattr(details, "category", None) or ""))
+    if stop == "max_tokens":
+        raise AnalysisError("max_tokens")
+    if stop != "end_turn":
+        raise AnalysisError("unexpected_stop", str(stop))
+
+    text = "".join(b.text for b in response.content if b.type == "text")
+    try:
+        data = parse_response(text)
+        items = enforce_states(data["items"], selected)
+        warnings = check_warnings(data["injection_warnings"], selected)
+    except ValueError as e:
+        raise AnalysisError("invalid_output", str(e)) from e
+
+    return {
+        "items": mark_duplicates(items, selected),
+        "injection_warnings": warnings,
+        "not_assessable": data["not_assessable"],
+        "not_read": not_read,
+        "meta": {
+            "model": MODEL,
+            "effort": EFFORT,
+            "stop_reason": stop,
+            "input_tokens": response.usage.input_tokens,
+            "output_tokens": response.usage.output_tokens,
+            "seconds": round(seconds, 1),
+            "request_id": getattr(response, "_request_id", None),
+        },
+    }
