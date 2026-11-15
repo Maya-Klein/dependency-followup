@@ -137,6 +137,23 @@ def test_max_tokens_raises_once_without_a_retry():
     assert len(client.calls) == 1
 
 
+@pytest.mark.parametrize(
+    "client",
+    [
+        FakeClient(output([]), stop_reason="refusal"),
+        FakeClient(output([]), stop_reason="max_tokens"),
+        FakeClient(output([]), stop_reason="pause_turn"),
+        FakeClient(text="not json"),
+    ],
+)
+def test_a_failed_call_still_reports_its_tokens(client):
+    with pytest.raises(AnalysisError) as e:
+        run(client, [upd(1, 16, KIND_THREAD, "שלום")])
+    assert e.value.meta["input_tokens"] == 1200
+    assert e.value.meta["output_tokens"] == 800
+    assert e.value.meta["request_id"] == "req_test"
+
+
 def test_an_unexpected_stop_reason_raises():
     with pytest.raises(AnalysisError) as e:
         run(FakeClient(output([]), stop_reason="pause_turn"), [upd(1, 16, KIND_THREAD, "שלום")])

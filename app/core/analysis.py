@@ -452,12 +452,15 @@ class AnalysisError(Exception):
     reason is one of: "refusal", "max_tokens", "unexpected_stop", "invalid_output".
     There is no automatic retry and no fallback model (plan.md, decisions 3 and 4);
     the caller shows a message, and the evaluation counts it as a failure.
+    meta holds the tokens and timing of the call (same keys as the result's "meta"),
+    because a failed call still costs money.
     """
 
-    def __init__(self, reason, detail=""):
+    def __init__(self, reason, detail="", meta=None):
         super().__init__(f"{reason}: {detail}" if detail else reason)
         self.reason = reason
         self.detail = detail
+        self.meta = meta
 
 
 def analyze(client, required_outcome, deadline, updates, *, today, our_side, max_chars, boundary=None):
@@ -492,13 +495,22 @@ def analyze(client, required_outcome, deadline, updates, *, today, our_side, max
     seconds = time.monotonic() - started
 
     stop = response.stop_reason
+    meta = {
+        "model": MODEL,
+        "effort": EFFORT,
+        "stop_reason": stop,
+        "input_tokens": response.usage.input_tokens,
+        "output_tokens": response.usage.output_tokens,
+        "seconds": round(seconds, 1),
+        "request_id": getattr(response, "_request_id", None),
+    }
     if stop == "refusal":
         details = getattr(response, "stop_details", None)
-        raise AnalysisError("refusal", str(getattr(details, "category", None) or ""))
+        raise AnalysisError("refusal", str(getattr(details, "category", None) or ""), meta)
     if stop == "max_tokens":
-        raise AnalysisError("max_tokens")
+        raise AnalysisError("max_tokens", "", meta)
     if stop != "end_turn":
-        raise AnalysisError("unexpected_stop", str(stop))
+        raise AnalysisError("unexpected_stop", str(stop), meta)
 
     text = "".join(b.text for b in response.content if b.type == "text")
     try:
@@ -506,20 +518,12 @@ def analyze(client, required_outcome, deadline, updates, *, today, our_side, max
         items = enforce_states(data["items"], selected)
         warnings = check_warnings(data["injection_warnings"], selected)
     except ValueError as e:
-        raise AnalysisError("invalid_output", str(e)) from e
+        raise AnalysisError("invalid_output", str(e), meta) from e
 
     return {
         "items": mark_duplicates(items, selected),
         "injection_warnings": warnings,
         "not_assessable": data["not_assessable"],
         "not_read": not_read,
-        "meta": {
-            "model": MODEL,
-            "effort": EFFORT,
-            "stop_reason": stop,
-            "input_tokens": response.usage.input_tokens,
-            "output_tokens": response.usage.output_tokens,
-            "seconds": round(seconds, 1),
-            "request_id": getattr(response, "_request_id", None),
-        },
+        "meta": meta,
     }
