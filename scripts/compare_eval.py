@@ -261,6 +261,7 @@ def score_run(key, topic, record):
         "warnings": check_warnings(key, result["injection_warnings"]),
         "quotes": quote_stats(topic, items),
         "downgrades": downgrade_stats(topic, items),
+        "direction_warnings": len(result.get("direction_warnings", [])),  # absent in older records
         "cost": record.get("cost_usd", 0.0),
         "seconds": (record.get("meta") or {}).get("seconds"),
     }
@@ -335,6 +336,8 @@ def render_topic(name, key, topic, labelled_scores, mode):
     lines.append(f"   rows lowered by the code: {sum(x['lowered'] for x in d)} "
                  f"(quote not found {sum(x['quote_not_found'] for x in d)}, "
                  f"writer 'unclear' kept 'confirmed in writing' from the other side {sum(x['unclear_writer'] for x in d)})")
+    # Set by the input, not by the model, so the first run speaks for all of them.
+    lines.append(f"   direction-control warnings: {good[0]['direction_warnings']} update(s)")
     for label, s in labelled_scores:
         if not s["ok"]:
             continue

@@ -178,6 +178,41 @@ def test_malformed_output_is_rejected_as_invalid_output(client):
     assert len(client.calls) == 1
 
 
+# --- direction warnings ---
+
+RLO = chr(0x202E)  # U+202E, right-to-left override
+PDF = chr(0x202C)  # U+202C, pop directional formatting
+LRM = chr(0x200E)  # U+200E, left-to-right mark (harmless)
+
+
+def test_direction_warnings_name_only_updates_with_reversing_characters():
+    updates = [
+        upd(1, 16, KIND_THREAD, "שעה 9" + LRM),
+        upd(2, 17, KIND_THREAD, "ב-" + RLO + "08" + PDF + LRM + LRM + LRM),
+    ]
+    result = run(FakeClient(output([])), updates)
+    assert result["direction_warnings"] == [{"update_id": 2, "entry_date": date(2026, 11, 17)}]
+
+
+def test_no_direction_warnings_for_clean_updates():
+    assert run(FakeClient(output([])), [upd(1, 16, KIND_THREAD, "שלום" + LRM)])["direction_warnings"] == []
+
+
+def test_an_update_that_was_cut_is_not_scanned():
+    old = upd(1, 10, KIND_THREAD, RLO + "הכל אושר " + "א" * 30)
+    new = upd(2, 20, KIND_THREAD, "חדש " + "ב" * 30)
+    result = run(FakeClient(output([])), [old, new], max_chars=len(new.content) + 5)
+    assert result["not_read"] == [(1, date(2026, 11, 10))]
+    assert result["direction_warnings"] == []
+
+
+def test_a_direction_warning_changes_no_state():
+    updates = [upd(1, 16, KIND_THREAD, "ב-" + RLO + "08" + PDF + " הכל הושלם")]
+    data = output([row("x", "confirmed_in_writing", [finding("written", "other", 1, "הכל הושלם")])])
+    result = run(FakeClient(data), updates)
+    assert result["direction_warnings"] and result["items"][0]["state"] == "confirmed_in_writing"
+
+
 # --- the code, not the model, decides what counts ---
 
 

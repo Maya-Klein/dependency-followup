@@ -316,6 +316,21 @@ def build_user_message(required_outcome, deadline, updates, not_read, boundary):
     return "\n\n".join(parts)
 
 
+def find_direction_warnings(updates):
+    """The updates that held characters which reverse how text is displayed.
+
+    Returns [{"update_id", "entry_date"}] in the order given, only for updates that
+    strip_direction_controls changed. LRM and RLM are harmless marks and do not count.
+    Information only: it changes no state and is not sent to the model.
+    """
+    found = []
+    for u in updates:
+        _, removed = strip_direction_controls(u.content)
+        if removed:
+            found.append({"update_id": u.id, "entry_date": u.entry_date})
+    return found
+
+
 # For output_config.format. Enums come from the constants above, so the schema and
 # the code that checks the rows cannot drift apart (a test compares them).
 OUTPUT_SCHEMA = {
@@ -469,6 +484,7 @@ def analyze(client, required_outcome, deadline, updates, *, today, our_side, max
     items: the rows after enforce_states (states checked in code) and mark_duplicates;
     injection_warnings: each with "verified"; not_assessable: texts;
     not_read: (id, entry_date) pairs of updates cut for length;
+    direction_warnings: id and date of each sent update that held reversing characters;
     meta: model, effort, stop_reason, tokens, seconds, request_id.
 
     Only the updates that were sent to the model are used to check its quotes.
@@ -530,5 +546,6 @@ def analyze(client, required_outcome, deadline, updates, *, today, our_side, max
         "injection_warnings": warnings,
         "not_assessable": data["not_assessable"],
         "not_read": not_read,
+        "direction_warnings": find_direction_warnings(selected),
         "meta": meta,
     }

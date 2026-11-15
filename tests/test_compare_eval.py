@@ -52,11 +52,11 @@ def item(name, state, missing="", findings=(), model_state=None, note=None):
             "model_state": model_state or state, "note": note}
 
 
-def record(items, warnings=()):
+def record(items, warnings=(), direction=()):
     return {
         "ok": True, "failure": None, "cost_usd": 0.02, "meta": {"seconds": 12.5},
         "result": {"items": items, "injection_warnings": list(warnings), "not_assessable": [],
-                   "not_read": [], "meta": {}},
+                   "not_read": [], "direction_warnings": list(direction), "meta": {}},
     }
 
 
@@ -280,6 +280,25 @@ def test_an_inconsistent_topic_is_flagged_for_two_more_runs():
     b = ce.score_run(KEY, TOPIC, record([item("המסמך", "missing", "חתימה אישור"), item("התשלום", "missing")]))
     text = "\n".join(ce.render_topic("topic9", KEY, TOPIC, [("r1", a), ("r2", b)], "improve"))
     assert "INCONSISTENT in 1 row(s) - run 2 more times" in text
+
+
+def test_direction_warnings_are_shown_as_a_number_only():
+    flagged = [{"update_id": 2, "entry_date": "2026-11-17"}]
+    s = ce.score_run(KEY, TOPIC, record(GOOD_ITEMS, direction=flagged))
+    assert s["direction_warnings"] == 1
+    for mode in ("improve", "final"):
+        text = "\n".join(ce.render_topic("topic9", KEY, TOPIC, [("r1", s)], mode))
+        assert "direction-control warnings: 1 update(s)" in text
+        assert "2026-11-17" not in text
+
+
+def test_a_record_saved_before_the_field_existed_counts_zero():
+    old = record(GOOD_ITEMS)
+    del old["result"]["direction_warnings"]
+    s = ce.score_run(KEY, TOPIC, old)
+    assert s["direction_warnings"] == 0
+    text = "\n".join(ce.render_topic("topic9", KEY, TOPIC, [("r1", s)], "improve"))
+    assert "direction-control warnings: 0 update(s)" in text
 
 
 def test_normalization_time_is_measured_without_any_api():
