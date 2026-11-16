@@ -1,101 +1,18 @@
 {
   "rows": [
-    {
-      "name": "3. דימויים וכיתובים במאמר האוצרת",
-      "match": [
-        "דימויים במאמר האוצרת",
-        "דימויים למאמר האוצרת",
-        "כיתובים במאמר האוצרת",
-        "דימויים במאמר של נועה",
-        "דימויים למאמר של נועה"
-      ],
-      "state": "confirmed_in_writing",
-      "missing_empty": true
-    },
-    {
-      "name": "4. דימויים וכיתובים במאמר האורח",
-      "match": [
-        "דימויים במאמר האורח",
-        "דימויים למאמר האורח",
-        "כיתובים במאמר האורח",
-        "דימויים במאמר של גיא",
-        "דימויים למאמר של גיא"
-      ],
-      "state": "no_longer_required",
-      "missing_empty": true
-    },
-    {
-      "name": "1. מאמר האוצרת, טקסט",
-      "match": [
-        "מאמר האוצרת",
-        "מאמר של נועה"
-      ],
-      "state": "missing",
-      "missing_must": [
-        [
-          "נועה",
-          "האוצרת",
-          "הכותבת"
-        ],
-        [
-          "אישור",
-          "אשר"
-        ]
-      ]
-    },
-    {
-      "name": "2. מאמר האורח, טקסט",
-      "match": [
-        "מאמר האורח",
-        "מאמר של גיא",
-        "אלמוג"
-      ],
-      "state": "missing",
-      "missing_must": [
-        [
-          "ערוך",
-          "עריכ",
-          "מירב"
-        ]
-      ]
-    },
-    {
-      "name": "5. צילומי העבודות של עמית",
-      "match": [
-        "עמית",
-        "ציורים",
-        "רן טל",
-        "צילומי העבודות"
-      ],
-      "state": "confirmed_in_writing",
-      "missing_empty": true
-    },
-    {
-      "name": "6. הדימוי של הפסל של לנה",
-      "match": [
-        "פסל",
-        "לנה",
-        "Kunsthalle",
-        "קונסטהאל"
-      ],
-      "state": "confirmed_in_writing",
-      "missing_empty": true
-    },
-    {
-      "name": "7. הדימוי מתוך רעש לבן",
-      "match": [
-        "רעש לבן",
-        "דנה"
-      ],
-      "state": "missing",
-      "missing_must": [
-        [
-          "קובץ",
-          "הדימוי",
-          "הגיע",
-          "התקבל"
-        ]
-      ]
-    }
+    {"name": "מאמר האוצרת, טקסט", "match": ["מאמר"], "match_require": ["נועה"], "match_exclude": ["דימוי", "כיתוב"],
+     "state": "missing", "missing_must": [["אישור"]]},
+    {"name": "מאמר האורח, טקסט", "match": ["מאמר"], "match_require": ["גיא"], "match_exclude": ["דימוי", "כיתוב"],
+     "state": "missing", "missing_must": [["הוחזר", "חזר"]]},
+    {"name": "דימויים וכיתובים במאמר האוצרת", "match": ["דימוי"], "match_require": ["נועה"],
+     "state": "confirmed_in_writing", "missing_empty": true},
+    {"name": "דימויים וכיתובים במאמר האורח", "match": ["דימוי"], "match_require": ["גיא"],
+     "state": "no_longer_required", "missing_empty": true},
+    {"name": "צילומי העבודות של עמית", "match": ["עמית"],
+     "state": "missing", "missing_must": [["כיתוב"]]},
+    {"name": "הדימוי של הפסל של לנה", "match": ["לנה", "גור", "Kunsthalle"],
+     "state": "confirmed_in_writing", "missing_empty": true},
+    {"name": "הדימוי מתוך רעש לבן", "match": ["דנה"],
+     "state": "missing", "missing_must": [["דימוי", "קובץ"]]}
   ]
 }
