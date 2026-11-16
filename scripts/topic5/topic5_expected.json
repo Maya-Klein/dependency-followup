@@ -1,72 +1,20 @@
 {
   "rows": [
-    {
-      "name": "1. אישור תקציבי",
-      "match": [
-        "תקציב",
-        "רחל",
-        "הנהלה",
-        "מנהלת המוסד"
-      ],
-      "state": "missing",
-      "missing_must": [
-        [
-          "נגר",
-          "אבי"
-        ],
-        [
-          "תאורה",
-          "ליאת"
-        ]
-      ]
-    },
-    {
-      "name": "2. הצעה מקבלן הבינוי",
-      "match": [
-        "בינוי",
-        "שלומי",
-        "קבלן"
-      ],
-      "state": "confirmed_in_writing",
-      "missing_empty": true
-    },
-    {
-      "name": "3. הצעה מהנגר",
-      "match": [
-        "נגר",
-        "אבי"
-      ],
-      "state": "missing",
-      "missing_must": [
-        [
-          "גרסה 3",
-          "מעודכנ",
-          "110"
-        ]
-      ]
-    },
-    {
-      "name": "4. תוכנית תאורה והצעה",
-      "match": [
-        "תאורה",
-        "ליאת"
-      ],
-      "state": "missing",
-      "missing_must": [
-        [
-          "גרסה 3",
-          "מעודכנ"
-        ]
-      ]
-    },
-    {
-      "name": "5. תוכנית מולטימדיה והצעה",
-      "match": [
-        "מולטימדיה",
-        "ערן"
-      ],
-      "state": "confirmed_in_writing",
-      "missing_empty": true
-    }
+    {"name": "הצעה מהנגר", "match": ["אבי", "נגר"], "match_exclude": ["אישור"],
+     "state": "missing", "missing_must": [["גרסה 3", "110"]]},
+    {"name": "הצעה מקבלן הבינוי", "match": ["שלומי", "בינוי", "גבס"], "match_exclude": ["אישור"],
+     "state": "confirmed_in_writing", "missing_empty": true},
+    {"name": "תוכנית תאורה והצעה", "match": ["ליאת", "תאורה"], "match_exclude": ["אישור"],
+     "state": "missing", "missing_must": [["גרסה 3"]]},
+    {"name": "תוכנית מולטימדיה והצעה", "match": ["ערן", "מולטימדיה"], "match_exclude": ["אישור"],
+     "state": "confirmed_in_writing", "missing_empty": true},
+    {"name": "אישור הנהלה: נגר", "match": ["נגר"], "match_require": ["אישור"],
+     "state": "missing", "missing_must": [["סופי", "מתוקנ"]]},
+    {"name": "אישור הנהלה: בינוי", "match": ["בינוי", "גבס"], "match_require": ["אישור"],
+     "state": "confirmed_in_writing", "missing_empty": true},
+    {"name": "אישור הנהלה: תאורה", "match": ["תאורה"], "match_require": ["אישור"],
+     "state": "missing", "missing_must": [["הצע"]]},
+    {"name": "אישור הנהלה: מולטימדיה", "match": ["מולטימדיה"], "match_require": ["אישור"],
+     "state": "confirmed_in_writing", "missing_empty": true}
   ]
 }
