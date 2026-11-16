@@ -88,6 +88,12 @@ def test_a_good_answer_key_is_read_with_defaults():
         {"rows": [{"name": "a", "match": ["a"], "state": "missing", "missing_must": ["a"]}]},
         {"rows": [{"name": "a", "match": ["a"], "state": "missing", "missing_must_not": "a"}]},
         {"rows": [{"name": "a", "match": ["a"], "state": "missing", "missing_empty": "yes"}]},
+        {"rows": [{"name": "a", "match": ["a"], "state": "missing", "match_require": "a"}]},
+        {"rows": [{"name": "a", "match": ["a"], "state": "missing", "match_require": [" "]}]},
+        {"rows": [{"name": "a", "match": ["a"], "state": "missing", "match_require": [1]}]},
+        {"rows": [{"name": "a", "match": ["a"], "state": "missing", "match_exclude": "a"}]},
+        {"rows": [{"name": "a", "match": ["a"], "state": "missing", "match_exclude": [""]}]},
+        {"rows": [{"name": "a", "match": ["a"], "state": "missing", "match_exclude": [None]}]},
         {"rows": [{"name": "a", "match": ["a"], "state": "missing"}], "warnings": {"min": 2, "max": 1}},
     ],
 )
@@ -125,6 +131,51 @@ def test_a_second_model_row_for_the_same_key_row_is_extra():
 def test_a_name_that_fits_two_key_rows_is_reported_and_goes_to_the_first_free_one():
     pairs, _, ambiguous = ce.match_rows(KEY["rows"], [item("מסמך התשלום", "missing")])
     assert pairs == {0: 0} and ambiguous == [0]
+
+
+def narrowed_key(**extra):
+    return ce.parse_answer_key(
+        {"rows": [{"name": "k", "match": ["aa"], "state": "missing", **extra}]}, "topic9")["rows"]
+
+
+def test_the_narrowing_fields_default_to_empty_lists():
+    row = narrowed_key()[0]
+    assert row["match_require"] == [] and row["match_exclude"] == []
+
+
+def test_match_require_needs_all_of_its_words_in_the_name():
+    rows = narrowed_key(match_require=["bb", "cc"])
+    pairs, extra, _ = ce.match_rows(rows, [item("aa bb", "missing"), item("aa bb cc", "missing")])
+    assert pairs == {0: 1} and extra == [0]
+
+
+def test_match_exclude_rejects_a_name_with_any_of_its_words():
+    rows = narrowed_key(match_exclude=["xx", "yy"])
+    pairs, extra, _ = ce.match_rows(rows, [item("aa yy", "missing"), item("aa", "missing")])
+    assert pairs == {0: 1} and extra == [0]
+
+
+def test_match_require_still_needs_one_match_word():
+    pairs, extra, _ = ce.match_rows(narrowed_key(match_require=["bb"]), [item("bb", "missing")])
+    assert pairs == {} and extra == [0]
+
+
+def test_two_key_rows_sharing_a_word_are_split_by_the_narrowing_fields():
+    rows = ce.parse_answer_key(
+        {"rows": [
+            {"name": "one", "match": ["aa"], "state": "missing", "match_exclude": ["bb"]},
+            {"name": "two", "match": ["aa"], "state": "missing", "match_require": ["bb"]},
+        ]}, "topic9")["rows"]
+    pairs, extra, ambiguous = ce.match_rows(rows, [item("aa bb", "missing"), item("aa", "missing")])
+    assert pairs == {1: 0, 0: 1} and extra == [] and ambiguous == []
+
+
+def test_the_narrowing_words_are_compared_after_normalization():
+    lrm = chr(0x200E)  # an invisible direction mark (category Cf), removed by the normalization
+    rows = narrowed_key(match_require=[f"b{lrm}b"], match_exclude=["x  x"])
+    pairs, _, _ = ce.match_rows(rows, [item("aa bb", "missing")])
+    assert pairs == {0: 0}
+    assert ce.match_rows(rows, [item(f"aa bb x{lrm} x", "missing")])[0] == {}
 
 
 def test_the_missing_text_needs_one_word_from_each_group_and_none_of_the_forbidden():

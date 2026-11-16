@@ -17,12 +17,19 @@ Usage:
 Answer key, scripts/<topic>/<topic>_expected.json:
     {"rows": [{"name": "...",                          # for the report only
                "match": ["word", "word"],              # a model row belongs here if its name has one of these
+               "match_require": ["word"],              # optional: ALL of these must also be in the name
+               "match_exclude": ["word"],              # optional: NONE of these may be in the name
                "state": "missing",                     # one of the five states
                "missing_must": [["w1", "w2"], ["w3"]], # each group needs at least one of its words
                "missing_must_not": ["word"],           # none of these may appear
                "missing_empty": false,                 # true: the "missing" text must be empty
                "may_be_not_assessable": false}],       # true: see below
      "warnings": {"min": 1, "max": 1, "quote_contains": ["word"]}}   # optional; default: none expected
+
+"match_require" and "match_exclude" (optional, default empty): a model row is a candidate for a key
+row only if its name has one of the "match" words, all of the "match_require" words and none of
+the "match_exclude" words (after normalization). They apply to the model row's name only, not to
+the not-assessable texts below.
 
 "may_be_not_assessable" (optional, default false): if no model row belongs to this key row, and
 one of its "match" words appears (after normalization) in a text the model listed under
@@ -89,6 +96,10 @@ def parse_answer_key(data, name):
         must_not = row.get("missing_must_not", [])
         if not isinstance(must_not, list) or not all(isinstance(w, str) and w.strip() for w in must_not):
             raise AnswerKeyError(f"{where}: 'missing_must_not' must be a list of words")
+        for field in ("match_require", "match_exclude"):
+            words = row.get(field, [])
+            if not isinstance(words, list) or not all(isinstance(w, str) and w.strip() for w in words):
+                raise AnswerKeyError(f"{where}: '{field}' must be a list of words")
         empty = row.get("missing_empty", False)
         if not isinstance(empty, bool):
             raise AnswerKeyError(f"{where}: 'missing_empty' must be true or false")
@@ -96,7 +107,8 @@ def parse_answer_key(data, name):
         if not isinstance(maybe, bool):
             raise AnswerKeyError(f"{where}: 'may_be_not_assessable' must be true or false")
         rows.append(
-            {"name": row["name"], "match": match, "state": row["state"], "missing_must": must,
+            {"name": row["name"], "match": match, "match_require": row.get("match_require", []),
+             "match_exclude": row.get("match_exclude", []), "state": row["state"], "missing_must": must,
              "missing_must_not": must_not, "missing_empty": empty, "may_be_not_assessable": maybe}
         )
     warnings = data.get("warnings", {"min": 0, "max": 0})
@@ -136,6 +148,14 @@ def _has(text_norm, word):
     return normalize_for_match(word) in text_norm
 
 
+def _name_fits(name_norm, key_row):
+    return (
+        any(_has(name_norm, w) for w in key_row["match"])
+        and all(_has(name_norm, w) for w in key_row["match_require"])
+        and not any(_has(name_norm, w) for w in key_row["match_exclude"])
+    )
+
+
 def match_rows(key_rows, model_rows):
     """Pair each answer-key row with at most one model row, by the key's words in the model row's name.
 
@@ -147,7 +167,7 @@ def match_rows(key_rows, model_rows):
     pairs, extra, ambiguous = {}, [], []
     for j, row in enumerate(model_rows):
         name = normalize_for_match(row["item"])
-        candidates = [i for i, k in enumerate(key_rows) if any(_has(name, w) for w in k["match"])]
+        candidates = [i for i, k in enumerate(key_rows) if _name_fits(name, k)]
         if not candidates:
             extra.append(j)
             continue
