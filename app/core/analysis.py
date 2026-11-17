@@ -268,10 +268,11 @@ Each row has exactly one state:
 - missing: not done, partly done, agreed only "in principle", in progress ("being handled", "will be sent this week"), or no evidence. Write what is missing in "missing".
 - no_longer_required: an update says it is no longer required.
 - proceeding_without_full_confirmation: an update says it was decided to go ahead without the full approval and take the risk. Going ahead while waiting for approval is "missing".
+What counts as missing: only what blocks the required outcome, including a condition the other side has set before it will act. These are not missing: a possibility the other side only raises without asking for it, an arrangement the parties have already settled, where nothing more is expected from the other side, and a request that belongs to a different outcome. Do not write them in "missing", and do not give a possibility or a request for a different outcome a row of its own.
 A written promise about the future ("will arrive Thursday") is a finding tagged commitment. The promised thing stays "missing" until there is evidence that it happened. A reply that is only an emoji (for example a thumbs up to "can we sign?") is written evidence but not confirmation: state "missing", with a note, and the user decides. An emoji of feeling changes no state.
 
 Findings: each row lists the findings that support its state or explain it. Every finding has:
-- tag: written (a written source), reported (told second-hand, or the user's own summary), opinion (the other side's view as written), commitment (a promise), decision (a decision recorded in an update). A decision recorded in the user's own summary (for example "we decided") is tagged decision, not reported.
+- tag: written (a written source), reported (told second-hand, or the user's own summary), opinion (the other side's view as written), commitment (a promise), decision (a decision recorded in an update). A decision recorded in the user's own summary (for example "we decided") is tagged decision, not reported. A written message from the other side that announces it gives something up, or decides to go ahead without it, is tagged decision, not written. A written approval or confirmation stays written.
 - who: ours, other or unclear, for the person who wrote the quoted words.
 - update_id: the number of the update the quote comes from.
 - quote: copied word for word, exactly, from that one update, in its original language. Never translate. Never join pieces from two places.
