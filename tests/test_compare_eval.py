@@ -439,3 +439,113 @@ def test_no_not_assessable_line_when_there_is_nothing_to_show():
 def test_normalization_time_is_measured_without_any_api():
     assert 0 <= ce.time_normalization(chars=2000) < 5
     assert "anthropic" not in Path(ce.__file__).read_text(encoding="utf-8")
+
+
+# --- forbidden rows ---
+
+
+def forbidden_key(forbidden):
+    return ce.parse_answer_key(
+        {"rows": [{"name": "שם-סודי-א", "match": ["מסמך"], "state": "missing"},
+                  {"name": "שם-סודי-ב", "match": ["תשלום"], "state": "reported_done", "missing_empty": True}],
+         "forbidden_rows": forbidden},
+        "topic9",
+    )
+
+
+FORBIDDEN_KEY = forbidden_key([{"name": "שם-אסור-א", "match": ["ביטוח"]},
+                               {"name": "שם-אסור-ב", "match": ["אחריות"], "match_require": ["שנתית"],
+                                "match_exclude": ["תשלום"]}])
+
+
+def test_a_key_without_forbidden_rows_reads_an_empty_list_and_keeps_the_denominator():
+    assert KEY["forbidden_rows"] == []
+    s = ce.score_run(KEY, TOPIC, record(GOOD_ITEMS))
+    assert s["forbidden"] == []
+    assert "state correct: 2/2" in "\n".join(ce.render_topic("topic9", KEY, TOPIC, [("r1", s)], "improve"))
+
+
+def test_a_forbidden_row_is_read_with_the_same_fields_as_a_key_row():
+    assert FORBIDDEN_KEY["forbidden_rows"][1] == {
+        "name": "שם-אסור-ב", "match": ["אחריות"], "match_require": ["שנתית"], "match_exclude": ["תשלום"]}
+    assert FORBIDDEN_KEY["forbidden_rows"][0]["match_require"] == []
+
+
+@pytest.mark.parametrize(
+    "forbidden",
+    [
+        "x",
+        {"name": "a", "match": ["a"]},
+        ["x"],
+        [{"match": ["a"]}],
+        [{"name": " ", "match": ["a"]}],
+        [{"name": "a"}],
+        [{"name": "a", "match": []}],
+        [{"name": "a", "match": [1]}],
+        [{"name": "a", "match": ["a"], "match_require": "a"}],
+        [{"name": "a", "match": ["a"], "match_require": [" "]}],
+        [{"name": "a", "match": ["a"], "match_exclude": "a"}],
+        [{"name": "a", "match": ["a"], "match_exclude": [None]}],
+    ],
+)
+def test_a_bad_forbidden_row_gives_an_error(forbidden):
+    with pytest.raises(ce.AnswerKeyError):
+        forbidden_key(forbidden)
+
+
+def test_a_run_without_a_forbidden_row_passes_and_the_denominator_grows():
+    s = ce.score_run(FORBIDDEN_KEY, TOPIC, record(GOOD_ITEMS))
+    assert [f["present"] for f in s["forbidden"]] == [False, False]
+    text = "\n".join(ce.render_topic("topic9", FORBIDDEN_KEY, TOPIC, [("r1", s)], "improve"))
+    assert "state correct: 4/4" in text and "forbidden row present" not in text
+
+
+def test_a_forbidden_row_present_fails_one_check_and_is_not_an_extra_row():
+    items = GOOD_ITEMS + [item("ביטוח נוסף", "missing"), item("ריהוט", "missing")]
+    s = ce.score_run(FORBIDDEN_KEY, TOPIC, record(items))
+    assert [f["present"] for f in s["forbidden"]] == [True, False]
+    assert s["forbidden"][0]["model_name"] == "ביטוח נוסף"
+    assert s["extra_rows"] == 1  # only "ריהוט"
+    improve = "\n".join(ce.render_topic("topic9", FORBIDDEN_KEY, TOPIC, [("r1", s)], "improve"))
+    assert "state correct: 3/4" in improve
+    assert "failed row, r1: forbidden row present: model row 'ביטוח נוסף'" in improve
+    assert "שם-אסור-א" not in improve
+    final = "\n".join(ce.render_topic("topic9", FORBIDDEN_KEY, TOPIC, [("r1", s)], "final"))
+    assert "forbidden row present" in final and "שם-אסור-א" in final
+
+
+def test_a_row_that_fits_a_key_row_is_not_checked_against_the_forbidden_rows():
+    s = ce.score_run(FORBIDDEN_KEY, TOPIC, record([item("מסמך ביטוח", "missing"), item("התשלום", "reported_done")]))
+    assert [f["present"] for f in s["forbidden"]] == [False, False]
+    assert s["extra_rows"] == 0
+
+
+def test_a_repeated_key_row_stays_extra_and_is_not_forbidden():
+    items = GOOD_ITEMS + [item("מסמך שני ביטוח", "missing")]
+    s = ce.score_run(FORBIDDEN_KEY, TOPIC, record(items))
+    assert [f["present"] for f in s["forbidden"]] == [False, False]
+    assert s["extra_rows"] == 1
+
+
+def test_the_narrowing_fields_work_on_a_forbidden_row():
+    only_require = ce.score_run(FORBIDDEN_KEY, TOPIC, record(GOOD_ITEMS + [item("אחריות", "missing")]))
+    assert only_require["forbidden"][1]["present"] is False and only_require["extra_rows"] == 1
+    both = ce.score_run(FORBIDDEN_KEY, TOPIC, record(GOOD_ITEMS + [item("אחריות שנתית", "missing")]))
+    assert both["forbidden"][1]["present"] is True and both["extra_rows"] == 0
+    excluded = ce.score_run(FORBIDDEN_KEY, TOPIC, record(GOOD_ITEMS + [item("אחריות שנתית תשלום", "missing")]))
+    assert excluded["forbidden"][1]["present"] is False
+
+
+def test_a_model_row_fitting_two_forbidden_rows_fails_both_and_counts_once():
+    s = ce.score_run(FORBIDDEN_KEY, TOPIC, record(GOOD_ITEMS + [item("ביטוח אחריות שנתית", "missing"),
+                                                                 item("ריהוט", "missing")]))
+    assert [f["present"] for f in s["forbidden"]] == [True, True]
+    assert s["extra_rows"] == 1
+
+
+def test_forbidden_checks_are_counted_in_every_good_run():
+    clean = ce.score_run(FORBIDDEN_KEY, TOPIC, record(GOOD_ITEMS))
+    dirty = ce.score_run(FORBIDDEN_KEY, TOPIC, record(GOOD_ITEMS + [item("ביטוח", "missing")]))
+    text = "\n".join(ce.render_topic("topic9", FORBIDDEN_KEY, TOPIC, [("r1", clean), ("r2", dirty)], "improve"))
+    assert "state correct: 7/8" in text and "'what is missing' correct: 4/4" in text
+    assert "failed row, r2: forbidden row present" in text and "failed row, r1" not in text

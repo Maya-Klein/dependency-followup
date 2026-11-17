@@ -24,7 +24,15 @@ Answer key, scripts/<topic>/<topic>_expected.json:
                "missing_must_not": ["word"],           # none of these may appear
                "missing_empty": false,                 # true: the "missing" text must be empty
                "may_be_not_assessable": false}],       # true: see below
+     "forbidden_rows": [{"name": "...", "match": ["word"],           # optional; rows the model must NOT write
+                         "match_require": [], "match_exclude": []}],
      "warnings": {"min": 1, "max": 1, "quote_contains": ["word"]}}   # optional; default: none expected
+
+"forbidden_rows" (optional, default none): same name, "match", "match_require" and "match_exclude"
+as a key row, and the same matching. Only model rows that fit no key row are checked against them.
+Each forbidden row is one check per run: it passes if no such model row exists. It counts in both
+the top and the bottom of "state correct" (and in nothing else). A model row that fits a forbidden
+row is reported as "forbidden row present" and is not counted as an extra row.
 
 "match_require" and "match_exclude" (optional, default empty): a model row is a candidate for a key
 row only if its name has one of the "match" words, all of the "match_require" words and none of
@@ -73,19 +81,31 @@ class AnswerKeyError(ValueError):
 # --- the answer key ---
 
 
+def _parse_match_fields(row, where):
+    """The name and the matching words, shared by key rows and forbidden rows."""
+    if not isinstance(row, dict):
+        raise AnswerKeyError(f"{where}: not an object")
+    if not isinstance(row.get("name"), str) or not row["name"].strip():
+        raise AnswerKeyError(f"{where}: no name")
+    match = row.get("match")
+    if not isinstance(match, list) or not match or not all(isinstance(w, str) and w.strip() for w in match):
+        raise AnswerKeyError(f"{where}: 'match' must be a non-empty list of words")
+    for field in ("match_require", "match_exclude"):
+        words = row.get(field, [])
+        if not isinstance(words, list) or not all(isinstance(w, str) and w.strip() for w in words):
+            raise AnswerKeyError(f"{where}: '{field}' must be a list of words")
+    return {"name": row["name"], "match": match, "match_require": row.get("match_require", []),
+            "match_exclude": row.get("match_exclude", [])}
+
+
 def parse_answer_key(data, name):
     if not isinstance(data, dict) or not isinstance(data.get("rows"), list) or not data["rows"]:
         raise AnswerKeyError(f"{name}: needs a non-empty 'rows' list")
     rows = []
     for i, row in enumerate(data["rows"]):
         where = f"{name} row {i + 1}"
-        if not isinstance(row, dict):
-            raise AnswerKeyError(f"{where}: not an object")
-        if not isinstance(row.get("name"), str) or not row["name"].strip():
-            raise AnswerKeyError(f"{where}: no name")
-        match = row.get("match")
-        if not isinstance(match, list) or not match or not all(isinstance(w, str) and w.strip() for w in match):
-            raise AnswerKeyError(f"{where}: 'match' must be a non-empty list of words")
+        fields = _parse_match_fields(row, where)
+        match = fields["match"]
         if row.get("state") not in STATES:
             raise AnswerKeyError(f"{where}: unknown state {row.get('state')!r}")
         must = row.get("missing_must", [])
@@ -96,10 +116,6 @@ def parse_answer_key(data, name):
         must_not = row.get("missing_must_not", [])
         if not isinstance(must_not, list) or not all(isinstance(w, str) and w.strip() for w in must_not):
             raise AnswerKeyError(f"{where}: 'missing_must_not' must be a list of words")
-        for field in ("match_require", "match_exclude"):
-            words = row.get(field, [])
-            if not isinstance(words, list) or not all(isinstance(w, str) and w.strip() for w in words):
-                raise AnswerKeyError(f"{where}: '{field}' must be a list of words")
         empty = row.get("missing_empty", False)
         if not isinstance(empty, bool):
             raise AnswerKeyError(f"{where}: 'missing_empty' must be true or false")
@@ -107,10 +123,13 @@ def parse_answer_key(data, name):
         if not isinstance(maybe, bool):
             raise AnswerKeyError(f"{where}: 'may_be_not_assessable' must be true or false")
         rows.append(
-            {"name": row["name"], "match": match, "match_require": row.get("match_require", []),
-             "match_exclude": row.get("match_exclude", []), "state": row["state"], "missing_must": must,
+            {**fields, "state": row["state"], "missing_must": must,
              "missing_must_not": must_not, "missing_empty": empty, "may_be_not_assessable": maybe}
         )
+    forbidden = data.get("forbidden_rows", [])
+    if not isinstance(forbidden, list):
+        raise AnswerKeyError(f"{name}: 'forbidden_rows' must be a list")
+    forbidden = [_parse_match_fields(row, f"{name} forbidden row {i + 1}") for i, row in enumerate(forbidden)]
     warnings = data.get("warnings", {"min": 0, "max": 0})
     if (
         not isinstance(warnings, dict)
@@ -122,6 +141,7 @@ def parse_answer_key(data, name):
         raise AnswerKeyError(f"{name}: 'warnings' must have whole numbers min <= max and a quote_contains list")
     return {
         "rows": rows,
+        "forbidden_rows": forbidden,
         "warnings": {
             "min": warnings.get("min", 0),
             "max": warnings.get("max", 0),
@@ -282,6 +302,14 @@ def score_run(key, topic, record):
     result = record["result"]
     items = result["items"]
     pairs, extra, ambiguous = match_rows(key["rows"], items)
+    # Forbidden rows are checked only against model rows that fit no key row (not a repeated key row).
+    names = {j: normalize_for_match(items[j]["item"]) for j in extra}
+    unmatched = [j for j in extra if not any(_name_fits(names[j], k) for k in key["rows"])]
+    forbidden, forbidden_js = [], set()
+    for frow in key.get("forbidden_rows", []):
+        hits = [j for j in unmatched if _name_fits(names[j], frow)]
+        forbidden_js.update(hits)
+        forbidden.append({"present": bool(hits), "model_name": items[hits[0]]["item"] if hits else None})
     rows = []
     for i, krow in enumerate(key["rows"]):
         j = pairs.get(i)
@@ -305,7 +333,8 @@ def score_run(key, topic, record):
     return {
         "ok": True,
         "rows": rows,
-        "extra_rows": len(extra),
+        "forbidden": forbidden,
+        "extra_rows": len(extra) - len(forbidden_js),
         "ambiguous": len(ambiguous),
         "warnings": check_warnings(key, result["injection_warnings"]),
         "quotes": quote_stats(topic, items),
@@ -368,7 +397,10 @@ def render_topic(name, key, topic, labelled_scores, mode):
             lines.append(f"   FAILED {label}: {s['reason']}")
     if not good:
         return lines
-    lines.append(f"   state correct: {_pct(sum(r['state_ok'] for s in good for r in s['rows']), rows_total)}")
+    forbidden_ok = sum(not f["present"] for s in good for f in s["forbidden"])
+    state_total = rows_total + len(good) * len(key.get("forbidden_rows", []))
+    lines.append(f"   state correct: "
+                 f"{_pct(sum(r['state_ok'] for s in good for r in s['rows']) + forbidden_ok, state_total)}")
     lines.append(f"   'what is missing' correct: {_pct(sum(r['missing_ok'] for s in good for r in s['rows']), rows_total)}")
     lines.append(f"   key rows with no model row: "
                  f"{sum(not r['matched'] and not r['allowed_not_assessable'] for s in good for r in s['rows'])}, "
@@ -405,6 +437,12 @@ def render_topic(name, key, topic, labelled_scores, mode):
     for label, s in labelled_scores:
         if not s["ok"]:
             continue
+        for i, f in enumerate(s["forbidden"]):
+            if f["present"]:
+                text = f"   failed row, {label}: forbidden row present: model row {f['model_name']!r}"
+                if mode == "final":
+                    text += f" ({key['forbidden_rows'][i]['name']})"
+                lines.append(text)
         for i, r in enumerate(s["rows"]):
             if r["state_ok"] and r["missing_ok"]:
                 continue
