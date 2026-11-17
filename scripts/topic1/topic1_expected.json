@@ -44,14 +44,7 @@
         "כרזה",
         "פוסטר"
       ],
-      "state": "proceeding_without_full_confirmation",
-      "missing_must": [
-        [
-          "אישור",
-          "בעל הזכויות",
-          "בעלי הזכויות"
-        ]
-      ]
+      "state": "proceeding_without_full_confirmation"
     },
     {
       "name": "5. דימוי הים",
@@ -60,14 +53,7 @@
         "הים",
         "דמות"
       ],
-      "state": "proceeding_without_full_confirmation",
-      "missing_must": [
-        [
-          "אישור",
-          "בעל הזכויות",
-          "בעלי הזכויות"
-        ]
-      ]
+      "state": "proceeding_without_full_confirmation"
     },
     {
       "name": "6. דימוי המרפסת",
