@@ -1,0 +1,114 @@
+{
+  "topic": "topic3",
+  "run": 1,
+  "stamp": "20261118-091655",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "יוסי ברנע",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "אורזים במקום. דיברתי עם יוסי והוא יהיה בבית.",
+            "note": "גיל מההובלה כתב שהאריזה תתבצע במקום ושיוסי יהיה בבית. אישור יוסי עצמו מגיע דרך גיל ולא ישירות.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "עמית רז",
+        "state": "reported_done",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "דיברתי עם עמית, ארז את כל ארבעת הציורים.",
+            "note": "סיכום של המשתמש בלבד, בלי אישור כתוב מעמית.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "ציוד האריזה הגיע 👍",
+            "note": "עמית אישר בכתב שציוד האריזה הגיע. זה לא מעיד שהאריזה הסתיימה.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "reported_done"
+      },
+      {
+        "item": "גלריה קו",
+        "state": "missing",
+        "missing": "שני הצילומים הגדולים (120x160) עדיין לא נארזו. הארגזים שלהם הגיעו לגלריה, ואין עדות לכך שהצילומים נארזו בהם.",
+        "findings": [
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "הצוות היה היום בגלריה וארז 4 מתוך 6 הצילומים",
+            "note": "סיכום של המשתמש בלבד. שני הצילומים הגדולים המתינו לארגזים.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 5,
+            "quote": "הארגזים לשני הצילומים הגדולים הגיעו אלינו היום",
+            "note": "שירן מהגלריה אישרה בכתב שהארגזים הגיעו. אין בהודעה אישור שהצילומים נארזו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [
+      "Kunsthalle Nord (לנה גור) - הארגז ארוז ומוכן לאיסוף, אבל נורד פרייט יאספו רק לאחר שהמוזיאון יאשר שקיבל את תעודת הביטוח. המשלוח מטופל על ידי ספק אחר, עם טיסה ב-26.11, ולא ניתן להעריך אם הוא שייך לאותה הובלה של 30.11."
+    ],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 3968,
+      "output_tokens": 2506,
+      "seconds": 18.8,
+      "request_id": "req_011Ch9z2de9dcqos3yvFV8hS"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 3968,
+    "output_tokens": 2506,
+    "seconds": 18.8,
+    "request_id": "req_011Ch9z2de9dcqos3yvFV8hS"
+  },
+  "cost_usd": 0.033
+}

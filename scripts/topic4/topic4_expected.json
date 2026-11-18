@@ -1,0 +1,114 @@
+{
+  "rows": [
+    {
+      "name": "מאמר האוצרת, טקסט",
+      "match": [
+        "מאמר"
+      ],
+      "match_require": [
+        "נועה"
+      ],
+      "match_exclude": [
+        "דימוי",
+        "כיתוב"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "אישור"
+        ]
+      ]
+    },
+    {
+      "name": "מאמר האורח, טקסט",
+      "match": [
+        "מאמר"
+      ],
+      "match_require": [
+        "גיא"
+      ],
+      "match_exclude": [
+        "דימוי",
+        "כיתוב"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "הוחזר",
+          "חזר"
+        ]
+      ]
+    },
+    {
+      "name": "דימויים וכיתובים במאמר האוצרת",
+      "match": [
+        "דימוי"
+      ],
+      "match_require": [
+        "נועה"
+      ],
+      "state": "confirmed_in_writing",
+      "missing_empty": true
+    },
+    {
+      "name": "דימויים וכיתובים במאמר האורח",
+      "match": [
+        "דימוי"
+      ],
+      "match_require": [
+        "גיא"
+      ],
+      "state": "no_longer_required",
+      "missing_empty": true
+    },
+    {
+      "name": "צילומי העבודות של עמית",
+      "match": [
+        "עמית"
+      ],
+      "match_exclude": [
+        "כיתוב"
+      ],
+      "state": "confirmed_in_writing",
+      "missing_empty": true
+    },
+    {
+      "name": "כיתובים לצילומי עמית",
+      "match": [
+        "עמית"
+      ],
+      "match_require": [
+        "כיתוב"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "כיתוב"
+        ]
+      ]
+    },
+    {
+      "name": "הדימוי של הפסל של לנה",
+      "match": [
+        "לנה",
+        "גור",
+        "Kunsthalle"
+      ],
+      "state": "confirmed_in_writing",
+      "missing_empty": true
+    },
+    {
+      "name": "הדימוי מתוך רעש לבן",
+      "match": [
+        "דנה"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "דימוי",
+          "קובץ"
+        ]
+      ]
+    }
+  ]
+}

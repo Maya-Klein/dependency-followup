@@ -1,0 +1,151 @@
+{
+  "topic": "topic3",
+  "run": 1,
+  "stamp": "20261117-151652",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "יוסי ברנע",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "08:00 - יוסי ברנע. ציור אחד. אורזים במקום. דיברתי עם יוסי והוא יהיה בבית.",
+            "note": "גיל כותב שתואמה אריזה במקום ושיוסי יהיה בבית. זהו דיווח של גיל על שיחה עם יוסי, ואין הודעה ישירה מיוסי.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "עמית רז",
+        "state": "reported_done",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "דיברתי עם עמית, ארז את כל ארבעת הציורים.",
+            "note": "סיכום של המשתמשת בלבד, בלי הודעה כתובה מעמית על סיום האריזה.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "ציוד האריזה הגיע 👍",
+            "note": "עמית אישר בכתב שציוד האריזה הגיע. זה לא אישור שהציורים נארזו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "reported_done"
+      },
+      {
+        "item": "גלריה קו",
+        "state": "missing",
+        "missing": "אישור שנארזו שני הצילומים הגדולים. הארגזים הגיעו לגלריה, אך אין עדות שהצילומים נארזו בהם.",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "הצוות שלנו יגיע לארוז ביום א׳ 22.11 ב-9:00, וביום ההובלה רק אוספים.",
+            "note": "התחייבות של גיל לאריזה מראש.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "הצוות היה היום בגלריה וארז 4 מתוך 6 הצילומים. השניים הגדולים מחכים לארגזים, שאמורים להגיע לגלריה מחר.",
+            "note": "סיכום של המשתמשת: 4 מתוך 6 צילומים נארזו, והשניים הגדולים עדיין לא.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 5,
+            "quote": "הארגזים לשני הצילומים הגדולים הגיעו אלינו היום",
+            "note": "שירן מאשרת בכתב שהארגזים הגיעו. אין אישור שהצילומים נארזו בהם.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "Kunsthalle Nord – Lena Gur",
+        "state": "missing",
+        "missing": "אישור של Kunsthalle Nord שקיבלו את תעודת הביטוח. Nord Freight אוספים רק לאחר האישור הזה.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 3,
+            "quote": "The work has been packed by the museum and the crate is ready for collection",
+            "note": "ג'ונאס כותב שהיצירה ארוזה והארגז מוכן לאיסוף.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 3,
+            "quote": "we can only collect once Kunsthalle Nord confirms they have received the insurance certificate",
+            "note": "תנאי שהצד השני קבע לפני האיסוף. אין עדכון שהאישור התקבל.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 3982,
+      "output_tokens": 3219,
+      "seconds": 24.2,
+      "request_id": "req_011Ch8Zfidu9v66u9Uz6J1ej"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 3982,
+    "output_tokens": 3219,
+    "seconds": 24.2,
+    "request_id": "req_011Ch8Zfidu9v66u9Uz6J1ej"
+  },
+  "cost_usd": 0.04015
+}

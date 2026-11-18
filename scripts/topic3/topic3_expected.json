@@ -1,0 +1,61 @@
+{
+  "rows": [
+    {
+      "name": "יוסי ברנע, ציור אחד",
+      "match": [
+        "יוסי",
+        "ברנע"
+      ],
+      "state": "confirmed_in_writing",
+      "missing_empty": true
+    },
+    {
+      "name": "הסטודיו של עמית, 4 ציורים",
+      "match": [
+        "סטודיו",
+        "עמית",
+        "4 ציורים",
+        "ארבעה ציורים"
+      ],
+      "state": "reported_done"
+    },
+    {
+      "name": "גלריה קו, 6 צילומים",
+      "match": [
+        "גלריה",
+        "שירן",
+        "צילומים"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "גדול",
+          "120"
+        ],
+        [
+          "אריז",
+          "ארוז",
+          "ארז"
+        ]
+      ]
+    },
+    {
+      "name": "Kunsthalle Nord, הפסל",
+      "match": [
+        "Kunsthalle",
+        "קונסטהאל",
+        "פסל",
+        "לנה",
+        "מוזיאון"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "ביטוח",
+          "insurance"
+        ]
+      ],
+      "may_be_not_assessable": true
+    }
+  ]
+}

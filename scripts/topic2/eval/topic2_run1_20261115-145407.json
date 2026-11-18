@@ -1,0 +1,231 @@
+{
+  "topic": "topic2",
+  "run": 1,
+  "stamp": "20261115-145407",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "יוסי ברנע – הסכם חתום",
+        "state": "reported_done",
+        "missing": "צילום ההסכם החתום מיוסי",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "תשלחי לי את ההסכם ואחתום",
+            "note": "הבטחה בכתב מיוסי. לא כתוב בעדכונים שההסכם נשלח אליו.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "אמר שחתם על ההסכם וישלח לי צילום שלו מחר",
+            "note": "סיכום שיחת טלפון של המשתמשת, ללא אישור כתוב מיוסי. הצילום טרם התקבל, ואין מידע על חתימת הצד שלנו.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "reported_done"
+      },
+      {
+        "item": "Kunsthalle Nord – הסכם חתום",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "Please find attached the countersigned loan agreement.",
+            "note": "אנה כותבת שצורף ההסכם החתום. הקובץ עצמו לא נבדק.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 3,
+            "quote": "Signed for the Lender: Dr. Erik Holm, Director, Kunsthalle Nord",
+            "note": "נוסח ההסכם נושא חתימת המשאיל (18.11.2026) וחתימת תמר (17.11.2026).",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "Kunsthalle Nord – תעודת ביטוח",
+        "state": "missing",
+        "missing": "תעודת ביטוח nail-to-nail עם Kunsthalle Nord כמוטב, לפני האיסוף. אין עדות ששלחנו אותה.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "shipment can only take place after we receive the nail-to-nail insurance certificate naming Kunsthalle Nord as beneficiary",
+            "note": "תנאי למשלוח לפי סעיף 9 בהסכם.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "Kunsthalle Nord – אישור תמונה וכיתוב",
+        "state": "missing",
+        "missing": "אישור המשאיל לתמונה ולכיתוב לפני הדפסת הקטלוג. אין עדות לשליחה או לאישור.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "We would also like to approve the image and caption of the work before the catalogue goes to print.",
+            "note": "בקשה של המשאיל לאישור.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "Kunsthalle Nord – עלות ההובלה",
+        "state": "missing",
+        "missing": "אין עדות לכיסוי עלויות ההובלה בפועל",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "our policy is that the borrower covers all costs, I'm afraid.",
+            "note": "תנאי של המשאיל.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "commitment",
+            "who": "ours",
+            "update_id": 2,
+            "quote": "OK, we'll cover the transport.",
+            "note": "התחייבות של הצד שלנו.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "Kunsthalle Nord – תנאי תצוגה (במה/מחסום)",
+        "state": "missing",
+        "missing": "תשובת השמרנית של המשאיל לגבי מחסום או שומר בחדר",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "A plinth should be fine, but our conservator may ask for a barrier or a guard in the room. I'll check with her and come back to you.",
+            "note": "אנה עוד לא חזרה עם תשובה סופית.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "גלריה קו – הסכם חתום",
+        "state": "missing",
+        "missing": "ההסכם החתום מהגלריה. הגלריה עדיין לא אישרה אותו, ויש לה הערות.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 6,
+            "quote": "עברנו עליו בגדול",
+            "note": "אין חתימה, והגלריה מציינת שיש לה הערות.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "מיכל אמרה לה שאין שום בעיה עם ההשאלה ושנקבל את ההסכם חתום בימים הקרובים",
+            "note": "דיווח מצד שני דרך נועה. העדכון המאוחר יותר (23.11) מציג הערות פתוחות. לא ברור לחלוטין שמדובר באותה מיכל.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "גלריה קו – תנאי משלוח ותצוגה",
+        "state": "missing",
+        "missing": "הערות הגלריה על הקרדיט ועל הביטוח טרם התקבלו, והתנאים שלה לא ידועים",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 6,
+            "quote": "יש לנו כמה הערות על הסעיף של הקרדיט ואולי גם על הביטוח, נשלח לך בהמשך השבוע",
+            "note": "הבטחה לשלוח הערות. הן עדיין לא התקבלו.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [
+      "לא ניתן להעריך: האם התנאים של יוסי ברנע (או עמית) למשלוח ולתצוגה נקבעו ומולאו. אין מידע בעדכונים.",
+      "לא ניתן להעריך: האם הצד שלנו חתם על ההסכם עם יוסי ברנע, ומי המשאיל בפועל (יוסי או עמית).",
+      "לא ניתן להעריך: האם הצד שלנו חתם על ההסכם עם גלריה קו."
+    ],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 4407,
+      "output_tokens": 4471,
+      "seconds": 30.7,
+      "request_id": "req_011Ch4kQ7zv1Jo5iYzErqbs2"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 4407,
+    "output_tokens": 4471,
+    "seconds": 30.7,
+    "request_id": "req_011Ch4kQ7zv1Jo5iYzErqbs2"
+  },
+  "cost_usd": 0.05352
+}

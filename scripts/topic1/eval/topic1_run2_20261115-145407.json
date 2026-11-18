@@ -1,0 +1,199 @@
+{
+  "topic": "topic1",
+  "run": 2,
+  "stamp": "20261115-145407",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "הפגנת הסטודנטים, 1971 (ארכיון מראות)",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "אנו מאשרים שימוש חד-פעמי בקטלוג התערוכה",
+            "note": "אישור בכתב מהארכיון, בכפוף לקרדיט מסוים. שימוש בפרסומים וברשתות החברתיות טעון אישור נפרד.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "נמל יפו בשחר, 1968 (יורשי הצלם)",
+        "state": "missing",
+        "missing": "אין אישור בכתב מיורשי הצלם. אורנה שטרן אמרה בעל פה שבעקרון אין לה בעיה, אך הזכויות גם של אחיה והיא עוד לא חזרה עם תשובה. לא תועדה החלטה להוציא את הדימוי או להשתמש בו בלי אישור מלא.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "ואיננו מוסמכים לאשר את השימוש",
+            "note": "הארכיון מציין שהזכויות אצל יורשי הצלם ולכן אינו יכול לאשר.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 2,
+            "quote": "אמרה שבעקרון אין לה בעיה שנשתמש בצילום של הנמל",
+            "note": "דיווח של המשתמשת על שיחה בעל פה. זו הסכמה עקרונית בלבד, והיא אינה אישור בכתב.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "אורנה עדיין לא חזרה אליי.",
+            "note": "נכון ל-22.11.2026 אין תשובה.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "חדר המתנה (יואב כהן)",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 4,
+            "quote": "אני מאשר שימוש בצילום התיעוד שלי של המיצב",
+            "note": "אישור בכתב מבעל הזכויות לקטלוג, לפרסומים ולרשתות החברתיות, כולל נוסח הקרדיט בעברית ובאנגלית.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "כרזה משנות ה-60",
+        "state": "proceeding_without_full_confirmation",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "decision",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "הכרזה משנות ה-60 - לוקחים את הסיכון ומוסיפים לקטלוג את נוסח הדיסקליימר.",
+            "note": "החלטה מתועדת בסיכום של המשתמשת להמשיך בלי אישור, כי לא אותרו בעלי הזכויות.",
+            "verified": true,
+            "effective_tag": "decision",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "opinion",
+            "who": "other",
+            "update_id": 3,
+            "quote": "הסיכון לדעתי נמוך, אבל אינני יכולה להבטיח שאין סיכון.",
+            "note": "חוות דעת של עו\"ד שירה מזרחי.",
+            "verified": true,
+            "effective_tag": "opinion",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "proceeding_without_full_confirmation"
+      },
+      {
+        "item": "רעש לבן - דימוי המרפסת",
+        "state": "no_longer_required",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "decision",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "הדימוי עם המרפסת יוצא מהקטלוג, כי שירה העריכה שהסיכון בו גבוה יותר.",
+            "note": "הוחלט להוציא את הדימוי מהקטלוג.",
+            "verified": true,
+            "effective_tag": "decision",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "opinion",
+            "who": "other",
+            "update_id": 3,
+            "quote": "בדימוי עם המרפסת הצילום המקורי עדיין מזוהה, והסיכון גבוה יותר.",
+            "note": "חוות דעת של עו\"ד שירה מזרחי.",
+            "verified": true,
+            "effective_tag": "opinion",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "no_longer_required"
+      },
+      {
+        "item": "רעש לבן - דימוי הדמות על רקע הים",
+        "state": "proceeding_without_full_confirmation",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "decision",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "בדימוי עם הדמות על רקע הים משתמשים, על אחריותנו.",
+            "note": "החלטה מתועדת בסיכום של המשתמשת להשתמש בדימוי בלי אישור מבעלי הזכויות.",
+            "verified": true,
+            "effective_tag": "decision",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "opinion",
+            "who": "other",
+            "update_id": 3,
+            "quote": "הדימוי עם הדמות על רקע הים בסיכון נמוך יותר",
+            "note": "חוות דעת של עו\"ד שירה מזרחי, שציינה שאין ודאות מלאה בלי אישורים מכל בעלי הזכויות.",
+            "verified": true,
+            "effective_tag": "opinion",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "proceeding_without_full_confirmation"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 4978,
+      "output_tokens": 3371,
+      "seconds": 21.8,
+      "request_id": "req_011Ch4kM4PYBq8WMjUchpQrQ"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 4978,
+    "output_tokens": 3371,
+    "seconds": 21.8,
+    "request_id": "req_011Ch4kM4PYBq8WMjUchpQrQ"
+  },
+  "cost_usd": 0.04367
+}

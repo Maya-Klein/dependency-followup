@@ -1,0 +1,241 @@
+{
+  "topic": "topic2",
+  "run": 2,
+  "stamp": "20261115-145407",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "הסכם חתום – Kunsthalle Nord",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "Please find attached the countersigned loan agreement.",
+            "note": "כתוב מצד המשאיל (אנה לינדקוויסט, 19.11). הקובץ המצורף עצמו לא נבדק.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 3,
+            "quote": "Signed for the Lender: Dr. Erik Holm, Director, Kunsthalle Nord",
+            "note": "נוסח ההסכם מופיע עם חתימות שני הצדדים (18.11 ו-17.11). הקובץ עצמו לא נבדק.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "תנאי ביטוח – Kunsthalle Nord",
+        "state": "missing",
+        "missing": "תעודת ביטוח nail-to-nail על שם Kunsthalle Nord כמוטב, שצריכה להישלח לפני האיסוף. אין עדות ששלחנו או שהמשאיל קיבל.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "shipment can only take place after we receive the nail-to-nail insurance certificate naming Kunsthalle Nord as beneficiary",
+            "note": "תנאי מפורש של המשאיל, לפי סעיף 9 להסכם.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "תנאי תצוגה – Kunsthalle Nord",
+        "state": "missing",
+        "missing": "המשאיל טרם חזר עם תשובת השמרנית לגבי מחסום או שומר בחדר.",
+        "findings": [
+          {
+            "tag": "opinion",
+            "who": "other",
+            "update_id": 2,
+            "quote": "A plinth should be fine, but our conservator may ask for a barrier or a guard in the room. I'll check with her and come back to you.",
+            "note": "התנאי עדיין פתוח. אנה הבטיחה לחזור עם תשובה.",
+            "verified": true,
+            "effective_tag": "opinion",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "אישור תמונה וכיתוב – Kunsthalle Nord",
+        "state": "missing",
+        "missing": "אין עדות לשליחת התמונה והכיתוב לאישור, ולא לקבלת אישור מהמשאיל.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "We would also like to approve the image and caption of the work before the catalogue goes to print.",
+            "note": "דרישה של המשאיל לפני הדפסת הקטלוג.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "עלויות הובלה – Kunsthalle Nord",
+        "state": "missing",
+        "missing": "אין עדות לביצוע או לתשלום ההובלה.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "our policy is that the borrower covers all costs, I'm afraid.",
+            "note": "תנאי המשאיל לגבי עלויות.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "commitment",
+            "who": "ours",
+            "update_id": 2,
+            "quote": "OK, we'll cover the transport.",
+            "note": "התחייבות מצידנו. אינה אישור מהצד השני ואינה הוכחה לביצוע.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "הסכם חתום – יוסי ברנע",
+        "state": "reported_done",
+        "missing": "הסכם חתום (צילום שיוסי אמור לשלוח). אין עותק כתוב, ואין אזכור לחתימה מצידנו.",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "סגור. תשלחי לי את ההסכם ואחתום",
+            "note": "הבטחה כתובה של יוסי לחתום. לא כתוב בעדכונים שההסכם נשלח אליו.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "אמר שחתם על ההסכם וישלח לי צילום שלו מחר",
+            "note": "סיכום של המשתמש משיחת טלפון. אין אישור כתוב מיוסי, והצילום לא התקבל לפי העדכונים.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "reported_done"
+      },
+      {
+        "item": "הסכם חתום – גלריה קו",
+        "state": "missing",
+        "missing": "הסכם חתום משני הצדדים. הגלריה עדיין לא החזירה אותו ויש לה הערות.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 6,
+            "quote": "עברנו עליו בגדול, יש לנו כמה הערות על הסעיף של הקרדיט ואולי גם על הביטוח",
+            "note": "אין חתימה מהצד השני.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 6,
+            "quote": "נשלח לך בהמשך השבוע.",
+            "note": "הבטחה לשלוח הערות. הערות אינן הסכם חתום.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "unclear",
+            "update_id": 4,
+            "quote": "מיכל אמרה לה שאין שום בעיה עם ההשאלה ושנקבל את ההסכם חתום בימים הקרובים.",
+            "note": "דיווח מיד שנייה מסיכום המשתמש, ואינו אישור כתוב. לא ברור אם מיכל זו היא מיכל מגלריה קו. סותר את ההודעה הכתובה מ-23.11.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "תנאי גלריה קו – קרדיט וביטוח",
+        "state": "missing",
+        "missing": "הערות הגלריה על הקרדיט ואולי על הביטוח טרם התקבלו. התנאים לא ידועים ולא סוכמו.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 6,
+            "quote": "יש לנו כמה הערות על הסעיף של הקרדיט ואולי גם על הביטוח",
+            "note": "התנאים עדיין לא נוסחו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [
+      "תנאי משלוח ותצוגה של יוסי ברנע – לא נכתבו תנאים בעדכונים. לא ניתן להעריך.",
+      "הובלה ליוסי ב-30.11 בבוקר – נרשם בסיכום המשתמש (עדכון 5) כסיכום, אך לא ברור אם זה תנאי של המשאיל. לא ניתן להעריך.",
+      "זהות המשאיל בהשאלת הציור – מופיעים יוסי ברנע ועמית (עדכון 1), ולא ברור מי מהם המשאיל. לא ניתן להעריך."
+    ],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 4407,
+      "output_tokens": 5078,
+      "seconds": 36.1,
+      "request_id": "req_011Ch4kSPNvgXfeMBKSpbuBp"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 4407,
+    "output_tokens": 5078,
+    "seconds": 36.1,
+    "request_id": "req_011Ch4kSPNvgXfeMBKSpbuBp"
+  },
+  "cost_usd": 0.05959
+}

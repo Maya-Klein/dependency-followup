@@ -1,0 +1,105 @@
+{
+  "rows": [
+    {
+      "name": "יוסי ברנע",
+      "match": [
+        "יוסי",
+        "ברנע"
+      ],
+      "state": "reported_done"
+    },
+    {
+      "name": "Kunsthalle Nord: הסכם",
+      "match": [
+        "Kunsthalle",
+        "קונסטהאל",
+        "מוזיאון"
+      ],
+      "match_require": [
+        "הסכם"
+      ],
+      "state": "confirmed_in_writing",
+      "missing_empty": true
+    },
+    {
+      "name": "Kunsthalle Nord: תעודת ביטוח",
+      "match": [
+        "Kunsthalle",
+        "קונסטהאל",
+        "מוזיאון"
+      ],
+      "match_require": [
+        "ביטוח"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "ביטוח",
+          "insurance"
+        ]
+      ],
+      "missing_must_not": [
+        "מחסום",
+        "שומר",
+        "barrier",
+        "guard"
+      ]
+    },
+    {
+      "name": "גלריה קו",
+      "match": [
+        "גלריה",
+        "גלריית",
+        "מיכל"
+      ],
+      "state": "missing",
+      "missing_must": [
+        [
+          "הערות",
+          "הסכם",
+          "חתום",
+          "חתימה"
+        ]
+      ]
+    }
+  ],
+  "forbidden_rows": [
+    {
+      "name": "מחסום או שומר",
+      "match": [
+        "מחסום",
+        "שומר",
+        "תצוגה",
+        "barrier",
+        "guard"
+      ],
+      "match_exclude": [
+        "גלריה"
+      ]
+    },
+    {
+      "name": "אישור תמונה וכיתוב לקטלוג",
+      "match": [
+        "תמונה",
+        "כיתוב",
+        "image",
+        "caption"
+      ],
+      "match_exclude": [
+        "גלריה"
+      ]
+    },
+    {
+      "name": "עלויות הובלה",
+      "match": [
+        "הובלה",
+        "transport",
+        "עלות",
+        "עלויות"
+      ],
+      "match_exclude": [
+        "גלריה"
+      ]
+    }
+  ]
+}

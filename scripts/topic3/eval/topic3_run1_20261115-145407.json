@@ -1,0 +1,124 @@
+{
+  "topic": "topic3",
+  "run": 1,
+  "stamp": "20261115-145407",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "יוסי ברנע",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "דיברתי עם יוסי והוא יהיה בבית.",
+            "note": "גיל כותב שהאריזה תתבצע במקום ושיוסי יהיה בבית. זה דיווח של גיל על שיחה עם יוסי, ולא הודעה מיוסי עצמו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "עמית רז",
+        "state": "reported_done",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "דיברתי עם עמית, ארז את כל ארבעת הציורים.",
+            "note": "האריזה מדווחת רק בסיכום של המשתמש, ללא הודעה כתובה מעמית.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "ציוד האריזה הגיע 👍",
+            "note": "עמית אישר בכתב שציוד האריזה הגיע. זה לא אישור שהציורים נארזו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "reported_done"
+      },
+      {
+        "item": "גלריה קו",
+        "state": "missing",
+        "missing": "אין אישור שהשני הצילומים הגדולים נארזו. הארגזים הגיעו לגלריה, אבל לא נכתב שהאריזה בוצעה. ארבעת הצילומים האחרים מדווחים כארוזים רק בסיכום של המשתמש.",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "הצוות שלנו יגיע לארוז ביום א׳ 22.11 ב-9:00, וביום ההובלה רק אוספים.",
+            "note": "התחייבות של גיל לאריזה מראש.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "הצוות היה היום בגלריה וארז 4 מתוך 6 הצילומים.",
+            "note": "סיכום של המשתמש על שיחה עם גיל, ללא אישור כתוב מהצד השני.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 5,
+            "quote": "הארגזים לשני הצילומים הגדולים הגיעו אלינו היום",
+            "note": "שירן מאשרת בכתב שהארגזים הגיעו. זה לא אישור שהצילומים נארזו בהם.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [
+      "Kunsthalle Nord (Lena Gur) - ההובלה מתבצעת דרך Nord Freight, עם טיסה ב-26.11 ומסירה ב-30.11. לא ברור אם היא חלק מהאיסוף של ארט-ליין ב-30.11. ג'ונאס כותב שהארגז ארוז ומוכן, אבל האיסוף מותנה באישור המוזיאון על קבלת תעודת הביטוח, ואין עדכון על כך."
+    ],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 3804,
+      "output_tokens": 2652,
+      "seconds": 19.1,
+      "request_id": "req_011Ch4kXe9KofJpegYE6RByA"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 3804,
+    "output_tokens": 2652,
+    "seconds": 19.1,
+    "request_id": "req_011Ch4kXe9KofJpegYE6RByA"
+  },
+  "cost_usd": 0.03413
+}

@@ -1,0 +1,174 @@
+{
+  "topic": "topic2",
+  "run": 2,
+  "stamp": "20261117-145907",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "Kunsthalle Nord – הסכם חתום",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "Please find attached the countersigned loan agreement.",
+            "note": "אנה לינדקוויסט מהמשאיל כותבת שההסכם מצורף כשהוא חתום גם על ידם. הקובץ המצורף עצמו לא נבדק.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 3,
+            "quote": "Signed for the Lender: Dr. Erik Holm, Director, Kunsthalle Nord",
+            "note": "נוסח ההסכם מופיע עם חתימות של שני הצדדים (18.11.2026 מצד המשאיל, 17.11.2026 מצד תמר).",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "Kunsthalle Nord – תעודת ביטוח",
+        "state": "missing",
+        "missing": "תעודת ביטוח nail-to-nail עם Kunsthalle Nord כמוטב, שיש לשלוח לפני האיסוף. אין עדות לכך שנשלחה.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "shipment can only take place after we receive the nail-to-nail insurance certificate naming Kunsthalle Nord as beneficiary",
+            "note": "תנאי של המשאיל למשלוח, לפי סעיף 9 בהסכם.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 3,
+            "quote": "Shipment shall not take place before the Lender has received the certificate of insurance.",
+            "note": "אותו תנאי מופיע בנוסח ההסכם.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "Kunsthalle Nord – אישור תמונה וכיתוב",
+        "state": "missing",
+        "missing": "אישור של המשאיל לתמונה ולכיתוב של העבודה לפני הדפסת הקטלוג. אין עדות לכך שנשלחו לאישור או שאושרו.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "We would also like to approve the image and caption of the work before the catalogue goes to print.",
+            "note": "בקשת אישור של המשאיל.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "יוסי ברנע – הסכם",
+        "state": "reported_done",
+        "missing": "צילום ההסכם החתום מיוסי. הסיכום מבוסס רק על דיווח שלנו, ללא מסמך כתוב מהצד השני.",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "סגור. תשלחי לי את ההסכם ואחתום",
+            "note": "התחייבות של יוסי לחתום לאחר קבלת ההסכם.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "אמר שחתם על ההסכם וישלח לי צילום שלו מחר",
+            "note": "סיכום שיחת טלפון של המשתמש. לא התקבלה אישור כתוב או צילום של ההסכם.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "reported_done"
+      },
+      {
+        "item": "גלריה קו – הסכם",
+        "state": "missing",
+        "missing": "ההסכם לא חתום. הגלריה מתכננת לשלוח הערות על סעיף הקרדיט ואולי גם על הביטוח, ועדיין לא נשלחו.",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 6,
+            "quote": "עברנו עליו בגדול, יש לנו כמה הערות על הסעיף של הקרדיט ואולי גם על הביטוח, נשלח לך בהמשך השבוע.",
+            "note": "מיכל כותבת שההסכם נבדק רק בגדול ושההערות ישלחו בהמשך. אין חתימה.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "מיכל אמרה לה שאין שום בעיה עם ההשאלה ושנקבל את ההסכם חתום בימים הקרובים",
+            "note": "דיווח מיד שנייה דרך נועה. ההודעה הכתובה מ-23.11 מראה שההסכם עדיין בבדיקה.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [
+      "האם תמר או אורי שגב חתמו על ההסכם עם יוסי ברנע: לא ניתן להעריך",
+      "תנאי המשאיל של גלריה קו למשלוח ולתצוגה: לא ניתן להעריך, הגלריה טרם הגדירה תנאים",
+      "האם נדרשים מחסום או שומר בחדר בתצוגה ב-Kunsthalle Nord: לא ניתן להעריך, המשאיל כתב שהקונסרבטורית אולי תבקש ושיבדוק וישוב אלינו"
+    ],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 4601,
+      "output_tokens": 4014,
+      "seconds": 28.5,
+      "request_id": "req_011Ch8YTLuzCmX6mKvfXt7WZ"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 4601,
+    "output_tokens": 4014,
+    "seconds": 28.5,
+    "request_id": "req_011Ch8YTLuzCmX6mKvfXt7WZ"
+  },
+  "cost_usd": 0.04934
+}

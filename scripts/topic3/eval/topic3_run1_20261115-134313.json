@@ -1,0 +1,134 @@
+{
+  "topic": "topic3",
+  "run": 1,
+  "stamp": "20261115-134313",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "יוסי ברנע",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "08:00 - יוסי ברנע. ציור אחד. אורזים במקום.",
+            "note": "גיל מהובלות כתב שהאריזה תתבצע במקום ביום ההובלה",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "דיברתי עם יוסי והוא יהיה בבית.",
+            "note": "גיל מדווח על שיחה עם יוסי. אין הודעה ישירה מיוסי",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "עמית רז",
+        "state": "reported_done",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "ציוד האריזה הגיע 👍",
+            "note": "עמית אישר בכתב שציוד האריזה הגיע. זו אינה אישור שהציורים נארזו",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "דיברתי עם עמית, ארז את כל ארבעת הציורים.",
+            "note": "סיכום של המשתמשת בלבד. אין אישור בכתב מעמית על סיום האריזה",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "reported_done"
+      },
+      {
+        "item": "גלריה קו",
+        "state": "missing",
+        "missing": "אין אישור שהשניים הגדולים (120x160) נארזו. הארגזים הגיעו לגלריה, אך לא דווח על אריזה. 4 מתוך 6 הצילומים נארזו לפי סיכום המשתמשת בלבד",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "הצוות שלנו יגיע לארוז ביום א׳ 22.11 ב-9:00, וביום ההובלה רק אוספים.",
+            "note": "התחייבות של גיל לאריזה מראש",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "הצוות היה היום בגלריה וארז 4 מתוך 6 הצילומים.",
+            "note": "סיכום של המשתמשת, ללא אישור בכתב מהצד השני",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 5,
+            "quote": "הארגזים לשני הצילומים הגדולים הגיעו אלינו היום",
+            "note": "שירן אישרה בכתב שהארגזים הגיעו. לא נכתב שהצילומים נארזו בהם",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [
+      "העבודה של לנה גור בקונסטהאלה נורד (Nord Freight): לא ניתן להעריך אם היא שייכת להובלה של 30.11 מנקודות האיסוף. מדובר במשלח אחר, והאיסוף מותנה באישור תעודת הביטוח"
+    ],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 3811,
+      "output_tokens": 2378,
+      "seconds": 18.8,
+      "request_id": "req_011Ch4euhcqXbSSEGPMcQSGc"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 3811,
+    "output_tokens": 2378,
+    "seconds": 18.8,
+    "request_id": "req_011Ch4euhcqXbSSEGPMcQSGc"
+  },
+  "cost_usd": 0.0314
+}

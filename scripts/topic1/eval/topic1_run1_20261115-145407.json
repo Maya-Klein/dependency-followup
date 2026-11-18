@@ -1,0 +1,219 @@
+{
+  "topic": "topic1",
+  "run": 1,
+  "stamp": "20261115-145407",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "הפגנת הסטודנטים, 1971 (ארכיון מראות)",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "אנו מאשרים שימוש חד-פעמי בקטלוג התערוכה",
+            "note": "אישור בכתב מרינה אלון מהארכיון, מיום 11.11.2026. מותנה בקרדיט \"צילום: ארכיון מראות\". שימוש בפרסומים וברשתות חברתיות טעון אישור נפרד.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "נמל יפו בשחר, 1968 (יורשי שטרן)",
+        "state": "missing",
+        "missing": "אישור בכתב מיורשי הצלם (אורנה שטרן ואחיה). עד כה יש רק הסכמה בעקרון בשיחה, והיא עדיין לא חזרה.",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "איננו מוסמכים לאשר את השימוש",
+            "note": "הארכיון מצהיר שהזכויות שייכות ליורשי הצלם ושאינו מוסמך לאשר.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 2,
+            "quote": "בעקרון אין לה בעיה שנשתמש בצילום של הנמל",
+            "note": "דברי אורנה כפי שסוכמו על ידי המשתמשת, לא מקור כתוב. הזכויות שלה ושל אחיה והיא צריכה להתייעץ איתו.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "commitment",
+            "who": "ours",
+            "update_id": 2,
+            "quote": "אמרה שתחזור אליי בשבוע הבא",
+            "note": "הבטחה של אורנה כפי שסוכמה על ידי המשתמשת. ההבטחה עדיין לא התקיימה.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "אורנה עדיין לא חזרה אליי",
+            "note": "נכון ל-22.11.2026 אין תשובה.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "חדר המתנה (יואב כהן)",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 4,
+            "quote": "אני מאשר שימוש בצילום התיעוד שלי של המיצב",
+            "note": "אישור בכתב מיום 20.11.2026, נכתב על ידי יואב עצמו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 4,
+            "quote": "וגם בפרסומים של התערוכה וברשתות החברתיות.",
+            "note": "האישור מפרט את היקף השימוש וכולל נוסח קרדיט בעברית ובאנגלית.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "הכרזה משנות ה-60",
+        "state": "proceeding_without_full_confirmation",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "decision",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "הכרזה משנות ה-60 - לוקחים את הסיכון ומוסיפים לקטלוג את נוסח הדיסקליימר.",
+            "note": "החלטה מתועדת מפגישת ההפקה מיום 22.11.2026 להמשיך בלי אישור בעלי הזכויות.",
+            "verified": true,
+            "effective_tag": "decision",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "opinion",
+            "who": "other",
+            "update_id": 3,
+            "quote": "הסיכון לדעתי נמוך, אבל אינני יכולה להבטיח שאין סיכון.",
+            "note": "חוות דעת עו\"ד שירה מזרחי. בעלי הזכויות לא אותרו.",
+            "verified": true,
+            "effective_tag": "opinion",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "proceeding_without_full_confirmation"
+      },
+      {
+        "item": "רעש לבן - דימוי המרפסת",
+        "state": "no_longer_required",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "decision",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "הדימוי עם המרפסת יוצא מהקטלוג",
+            "note": "הוחלט להוציא את הדימוי מהקטלוג בעקבות הערכת הסיכון הגבוה יותר.",
+            "verified": true,
+            "effective_tag": "decision",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "opinion",
+            "who": "other",
+            "update_id": 3,
+            "quote": "בדימוי עם המרפסת הצילום המקורי עדיין מזוהה, והסיכון גבוה יותר.",
+            "note": "חוות דעת עו\"ד שירה מזרחי.",
+            "verified": true,
+            "effective_tag": "opinion",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "no_longer_required"
+      },
+      {
+        "item": "רעש לבן - דימוי הדמות על רקע הים",
+        "state": "proceeding_without_full_confirmation",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "decision",
+            "who": "ours",
+            "update_id": 5,
+            "quote": "בדימוי עם הדמות על רקע הים משתמשים, על אחריותנו.",
+            "note": "החלטה מתועדת מפגישת ההפקה מיום 22.11.2026 להשתמש בדימוי בלי אישור מלא.",
+            "verified": true,
+            "effective_tag": "decision",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "opinion",
+            "who": "other",
+            "update_id": 3,
+            "quote": "ודאות מלאה יש רק כשמתקבלים אישורים מכל בעלי הזכויות.",
+            "note": "חוות דעת עו\"ד שירה מזרחי: הסיכון בדימוי זה נמוך יותר אך לא מבוטל.",
+            "verified": true,
+            "effective_tag": "opinion",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "proceeding_without_full_confirmation"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 4978,
+      "output_tokens": 3387,
+      "seconds": 23.6,
+      "request_id": "req_011Ch4kKKoftAgarduMf6a6W"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 4978,
+    "output_tokens": 3387,
+    "seconds": 23.6,
+    "request_id": "req_011Ch4kKKoftAgarduMf6a6W"
+  },
+  "cost_usd": 0.04383
+}
