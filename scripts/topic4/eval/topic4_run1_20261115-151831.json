@@ -1,0 +1,230 @@
+{
+  "topic": "topic4",
+  "run": 1,
+  "stamp": "20261115-151831",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "מאמר נועה",
+        "state": "missing",
+        "missing": "אישור הכותבת לגרסה הערוכה; לא התקבלה תשובה שלה להערות ולהבהרות שהתבקשו",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "סיימתי את העריכה של המאמר של נועה ושלחתי לה את הקובץ עם ההערות",
+            "note": "העריכה הסתיימה לפי מירב, והקובץ נשלח לנועה עם בקשות להבהרה. אין בעדכונים אישור של נועה לגרסה הערוכה.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "מאמר גיא",
+        "state": "missing",
+        "missing": "המאמר הערוך עדיין לא הוחזר, ואין אישור של גיא",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "את המאמר של גיא אחזיר לך ביום חמישי",
+            "note": "הבטחה לעתיד מצד מירב. אין עדות שהמאמר הוחזר.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "צילומי ציורי עמית",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "הקבצים ב-TIFF, ברזולוציה לדפוס, עם כרטיס צבע בכל צילום",
+            "note": "רן מסר קישור להורדה. הקבצים עצמם לא נבדקו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "כיתובי ציורי עמית",
+        "state": "missing",
+        "missing": "לא התקבלו כיתובים לחמשת הציורים",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "הנה הקישור להורדה של הצילומים של חמשת הציורים של עמית",
+            "note": "ההודעה של רן לא כוללת כיתובים.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      },
+      {
+        "item": "דימויי נועה",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 3,
+            "quote": "מצרפת בקישור את שני הדימויים למאמר שלי, באיכות לדפוס",
+            "note": "הקישור והקבצים עצמם לא נבדקו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 3,
+            "quote": "1. הפגנת הסטודנטים, ירושלים, 1971. צילום: ארכיון מראות",
+            "note": "נועה מסרה כיתוב לכל אחד משני הדימויים.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "דימויי גיא",
+        "state": "no_longer_required",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "decision",
+            "who": "other",
+            "update_id": 4,
+            "quote": "החלטתי בסוף לוותר על הדימויים במאמר",
+            "note": "גיא ויתר על הדימויים במאמרו.",
+            "verified": true,
+            "effective_tag": "decision",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "no_longer_required"
+      },
+      {
+        "item": "דימוי ליין גור (Kunsthalle Nord)",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 5,
+            "quote": "Please find attached the official high-resolution image of the work for the catalogue.",
+            "note": "נכתב שהקובץ מצורף. הקובץ עצמו לא נבדק.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 5,
+            "quote": "Lena Gur, Untitled (Weight), 2021. Steel and felt, 120 x 60 x 85 cm. Collection Kunsthalle Nord. Photo: Kunsthalle Nord / M. Eklund",
+            "note": "כיתוב וקרדיט מלאים שנמסרו על ידי המוסד.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "opinion",
+            "who": "other",
+            "update_id": 5,
+            "quote": "we would like to see the layout of the page before it goes to print.",
+            "note": "המוסד מבקש לראות את עימוד העמוד לפני הדפוס. לא ניתן להעריך אם זו דרישת אישור.",
+            "verified": true,
+            "effective_tag": "opinion",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "דימוי דנה לוין",
+        "state": "missing",
+        "missing": "הקובץ לא הגיע בפועל, וגם כיתוב לא התקבל",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 6,
+            "quote": "מצורף הדימוי לקטלוג, סורי על השעה",
+            "note": "דנה כתבה שצירפה את הדימוי.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 6,
+            "quote": "לא הגיע כלום",
+            "note": "תמר כתבה שלא התקבל דבר. דנה לא ענתה על כך.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [
+      "טקסטי קיר (קיצור הטקסט על העבודה של דנה): לא ברור אם שייכים לחומרי הקטלוג",
+      "מאמרים נוספים או כותבים נוספים לקטלוג, אם יש: לא ניתן להעריך"
+    ],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 3582,
+      "output_tokens": 3800,
+      "seconds": 27.3,
+      "request_id": "req_011Ch4nE36gXD3z1VW8AUJw9"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 3582,
+    "output_tokens": 3800,
+    "seconds": 27.3,
+    "request_id": "req_011Ch4nE36gXD3z1VW8AUJw9"
+  },
+  "cost_usd": 0.04516
+}

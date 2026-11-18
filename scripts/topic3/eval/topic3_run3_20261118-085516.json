@@ -1,0 +1,134 @@
+{
+  "topic": "topic3",
+  "run": 3,
+  "stamp": "20261118-085516",
+  "today": "2026-11-24",
+  "ok": true,
+  "failure": null,
+  "result": {
+    "items": [
+      {
+        "item": "יוסי ברנע",
+        "state": "confirmed_in_writing",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 1,
+            "quote": "אורזים במקום. דיברתי עם יוסי והוא יהיה בבית.",
+            "note": "גיל כתב שהאריזה במקום תואמה ושיוסי יהיה בבית. התיאום עם יוסי מדווח דרך גיל, ויוסי עצמו לא כתב.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "confirmed_in_writing"
+      },
+      {
+        "item": "עמית רז",
+        "state": "reported_done",
+        "missing": "",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "עמית אורז בעצמו",
+            "note": "התכנון שעמית ארוז בעצמו.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 2,
+            "quote": "ציוד האריזה הגיע 👍",
+            "note": "עמית אישר בכתב שציוד האריזה הגיע. זה לא מאשר שהציורים נארזו.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "דיברתי עם עמית, ארז את כל ארבעת הציורים.",
+            "note": "סיכום של המשתמש בלבד, בלי אישור כתוב מעמית.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "reported_done"
+      },
+      {
+        "item": "גלריה קו",
+        "state": "missing",
+        "missing": "אריזת שני הצילומים הגדולים (120x160) בארגזים שהגיעו. אין אישור כתוב מהגלריה או מגיל שארבעת הצילומים האחרים נארזו.",
+        "findings": [
+          {
+            "tag": "commitment",
+            "who": "other",
+            "update_id": 1,
+            "quote": "הצוות שלנו יגיע לארוז ביום א׳ 22.11 ב-9:00, וביום ההובלה רק אוספים.",
+            "note": "הבטחה של גיל לאריזה מראש. הגלריה ביקשה אריזה מראש כי אין לה צוות פנוי ללוות אריזה ביום ההובלה.",
+            "verified": true,
+            "effective_tag": "commitment",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "reported",
+            "who": "ours",
+            "update_id": 4,
+            "quote": "הצוות היה היום בגלריה וארז 4 מתוך 6 הצילומים. השניים הגדולים מחכים לארגזים, שאמורים להגיע לגלריה מחר.",
+            "note": "סיכום של המשתמש בלבד. אריזה חלקית: 4 מתוך 6.",
+            "verified": true,
+            "effective_tag": "reported",
+            "also_in_earlier": []
+          },
+          {
+            "tag": "written",
+            "who": "other",
+            "update_id": 5,
+            "quote": "הארגזים לשני הצילומים הגדולים הגיעו אלינו היום",
+            "note": "שירן אישרה בכתב שהארגזים הגיעו. אין עדות שהצילומים הגדולים נארזו בהם.",
+            "verified": true,
+            "effective_tag": "written",
+            "also_in_earlier": []
+          }
+        ],
+        "note": null,
+        "model_state": "missing"
+      }
+    ],
+    "injection_warnings": [],
+    "not_assessable": [
+      "Kunsthalle Nord (Lena Gur) – ג'ונאס כתב שהארגז ארוז ומוכן לאיסוף, אבל האיסוף מותנה באישור של המוזיאון על קבלת תעודת הביטוח. התשלוחה מנוהלת בנפרד על ידי Nord Freight עם טיסה ב-26.11, ולא ברור אם היא חלק מאיסוף ההובלה ב-30.11, ולכן לא ניתן להעריך."
+    ],
+    "not_read": [],
+    "direction_warnings": [],
+    "meta": {
+      "model": "claude-sonnet-5-5",
+      "effort": "high",
+      "stop_reason": "end_turn",
+      "input_tokens": 3968,
+      "output_tokens": 2846,
+      "seconds": 19.9,
+      "request_id": "req_011Ch9xdHXg8iUqBrTGYpntV"
+    }
+  },
+  "meta": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high",
+    "stop_reason": "end_turn",
+    "input_tokens": 3968,
+    "output_tokens": 2846,
+    "seconds": 19.9,
+    "request_id": "req_011Ch9xdHXg8iUqBrTGYpntV"
+  },
+  "cost_usd": 0.0364
+}
