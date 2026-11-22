@@ -5,10 +5,14 @@ Reads the hook payload (JSON) from stdin. Never fails the session: any error is 
 import json
 import subprocess
 import sys
+import traceback
 from datetime import datetime
 from pathlib import Path
 
 LOG = Path(r"C:\Users\user\Dev\AI_Developers\Notes\dependency-followup\יומן עבודה.md")
+ERROR_LOG = Path(__file__).resolve().parents[2] / "data" / "hook_errors.log"  # git-ignored (data/)
+ALERT = "היומן לא נכתב, ראי data/hook_errors.log"
+ALERT_LOG_FAILED = "היומן לא נכתב, וגם הכתיבה ל-data/hook_errors.log נכשלה"
 HEADER = "# יומן עבודה\n\nרשומות אוטומטיות מ-hook של Claude Code, בסוף כל סבב. הסיכום הוא ההודעה האחרונה של Claude.\n"
 MAX_CHARS = 600
 
@@ -67,8 +71,29 @@ def main():
         f.write("\n".join(lines) + "\n")
 
 
-if __name__ == "__main__":
+def log_error():
+    """Append the current traceback to ERROR_LOG. Returns False if even that fails."""
+    try:
+        ERROR_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with open(ERROR_LOG, "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] log_task.py\n{traceback.format_exc()}\n")
+        return True
+    except Exception:
+        return False
+
+
+def safe_main():
+    """Run main(); never fail the session. On error: log it and warn the user (systemMessage, exit 0)."""
     try:
         main()
     except Exception:
-        pass
+        message = ALERT if log_error() else ALERT_LOG_FAILED
+        try:
+            print(json.dumps({"systemMessage": message}, ensure_ascii=False))
+        except Exception:
+            pass
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(safe_main())
