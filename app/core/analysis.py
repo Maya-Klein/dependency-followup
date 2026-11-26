@@ -11,7 +11,8 @@ EFFORT = "high"
 MAX_TOKENS = 16000
 # Ceiling for the total length of the updates sent to the model, in characters (code points). It must
 # stay above the longest single update the app accepts (200,000), or select_updates refuses to run.
-# Provisional until measured with count_tokens (stage 6, PR 2).
+# Measured with count_tokens on 26.11.2026: at this length Hebrew is about 165,000 input tokens and
+# emoji about 628,000, both inside the context window (scripts/EVAL_RUNS.md).
 MAX_CHARS = 250_000
 
 # Characters that reorder how text is displayed (embeddings, overrides, isolates).
