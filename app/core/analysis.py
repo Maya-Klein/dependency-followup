@@ -9,6 +9,10 @@ import unicodedata
 MODEL = "claude-sonnet-5-5"
 EFFORT = "high"
 MAX_TOKENS = 16000
+# Ceiling for the total length of the updates sent to the model, in characters (code points). It must
+# stay above the longest single update the app accepts (200,000), or select_updates refuses to run.
+# Provisional until measured with count_tokens (stage 6, PR 2).
+MAX_CHARS = 250_000
 
 # Characters that reorder how text is displayed (embeddings, overrides, isolates).
 # LRM/RLM (U+200E/U+200F) are harmless marks common in Hebrew text, so they stay
@@ -385,6 +389,10 @@ OUTPUT_SCHEMA = {
 }
 
 
+# The same value is sent with the call and with count_tokens, so a count includes the schema.
+OUTPUT_CONFIG = {"effort": EFFORT, "format": {"type": "json_schema", "schema": OUTPUT_SCHEMA}}
+
+
 def parse_response(text):
     """Turn the model's text into the output dict, or raise ValueError.
 
@@ -502,10 +510,7 @@ def analyze(client, required_outcome, deadline, updates, *, today, our_side, max
     response = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS,
-        output_config={
-            "effort": EFFORT,
-            "format": {"type": "json_schema", "schema": OUTPUT_SCHEMA},
-        },
+        output_config=OUTPUT_CONFIG,
         system=system,
         messages=[{"role": "user", "content": message}],
     )

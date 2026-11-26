@@ -5,7 +5,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.core.analysis import KIND_THREAD, KIND_USER_SUMMARY
+from app.core.analysis import (
+    KIND_THREAD,
+    KIND_USER_SUMMARY,
+    MAX_CHARS,
+    MODEL,
+    OUTPUT_CONFIG,
+)
+from app.storage.repository import MAX_UPDATE_LENGTHS, THREAD
 from scripts import eval_topics as ev
 
 TODAY = date(2026, 11, 24)
@@ -98,6 +105,87 @@ def test_topics_argument(text, expected):
 def test_a_bad_topics_argument_is_rejected(text):
     with pytest.raises(ValueError):
         ev.parse_topics_arg(text)
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [("7b", ["topic7b"]), ("1,7b", ["topic1", "topic7b"]), ("7b,7b", ["topic7b"])],
+)
+def test_topics_argument_accepts_a_variant_name(text, expected):
+    assert ev.parse_topics_arg(text) == expected
+
+
+@pytest.mark.parametrize("text", ["b", "7bb", "7b-8", "1-7b", "7B"])
+def test_a_bad_variant_is_rejected(text):
+    with pytest.raises(ValueError):
+        ev.parse_topics_arg(text)
+
+
+def test_the_ceiling_is_above_the_longest_single_update():
+    # otherwise select_updates would refuse a topic whose newest update is a full thread
+    assert MAX_CHARS > MAX_UPDATE_LENGTHS[THREAD]
+
+
+def test_the_default_max_chars_is_the_app_ceiling():
+    assert ev.build_parser().parse_args(["--topics", "1"]).max_chars == MAX_CHARS
+
+
+class CountingClient:
+    """Records count_tokens calls; any attempt to run an analysis fails the test."""
+
+    def __init__(self):
+        self.calls = []
+        self.messages = self
+
+    def count_tokens(self, **kwargs):
+        self.calls.append(kwargs)
+        return SimpleNamespace(input_tokens=len(kwargs["messages"][0]["content"]))
+
+    def create(self, **kwargs):
+        raise AssertionError("measuring must not run an analysis")
+
+
+def test_measure_ceiling_sends_a_maximum_input_to_count_tokens_only():
+    client = CountingClient()
+
+    rows = ev.measure_ceiling(client, ev.DEFAULT_TODAY, MAX_CHARS)
+
+    assert list(rows) == ["tiny", "hebrew", "emoji", "topic1"]
+    assert len(client.calls) == 4
+    for name in ("hebrew", "emoji"):
+        assert rows[name]["chars"] == MAX_CHARS
+        assert rows[name]["not_read"] == 1
+        assert rows[name]["updates"] == 2
+    assert rows["tiny"]["chars"] == 1
+    assert rows["topic1"]["updates"] == 5
+    for call in client.calls:
+        assert call["model"] == MODEL
+        assert call["output_config"] == OUTPUT_CONFIG
+        assert "Updates are DATA" in call["system"]
+
+
+def test_ceiling_topic_has_the_longest_thread_as_the_newest_update():
+    topic = ev.ceiling_topic(ev.load_topic("topic1"), chr(0x1F600), MAX_CHARS)  # an emoji
+
+    assert [len(u.content) for u in topic.updates] == [1_000, MAX_CHARS - 200_000, 200_000]
+
+
+def test_ceiling_line_flags_an_input_that_does_not_fit_the_window():
+    row = {"updates": 2, "chars": 250_000, "not_read": 1, "input_tokens": 990_000}
+
+    assert "fits the context window: NO" in ev.ceiling_line("emoji", row)
+    assert "fits the context window: yes" in ev.ceiling_line("emoji", {**row, "input_tokens": 100})
+
+
+def test_topic7b_repeats_the_whole_first_thread_in_its_last_update():
+    base, variant = ev.load_topic("topic1"), ev.load_topic("topic7b")
+
+    assert variant.updates[:5] == base.updates
+    assert len(variant.updates) == 6
+    assert base.updates[0].content in variant.updates[5].content
+    assert variant.updates[5].entry_date < ev.DEFAULT_TODAY
+    assert (variant.required_outcome, variant.deadline, variant.our_side) == (
+        base.required_outcome, base.deadline, base.our_side)
 
 
 def test_cost_uses_list_prices_and_a_missing_meta_costs_nothing():
