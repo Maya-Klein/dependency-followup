@@ -8,6 +8,19 @@ from app.storage.db import DEFAULT_DATABASE_URL, get_engine
 
 csrf = CSRFProtect()
 
+# Second line of defence against XSS before AI output is shown (stage 6). The app has no inline
+# style or script and loads nothing from outside (fonts are local), so 'self' is enough.
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "same-origin",
+}
+
+
+def add_security_headers(response):
+    response.headers.update(SECURITY_HEADERS)
+    return response
+
 
 def create_app(database_url=None):
     load_dotenv()  # reads .env if present; variables already set are not overridden
@@ -25,6 +38,7 @@ def create_app(database_url=None):
     app.config["WTF_CSRF_TIME_LIMIT"] = None  # token lives as long as the session
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     csrf.init_app(app)
+    app.after_request(add_security_headers)
 
     from app.web.routes import bp
 
