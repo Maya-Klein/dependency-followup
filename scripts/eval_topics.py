@@ -7,6 +7,7 @@ Does not touch the app, the database or the tests.
 Usage:
     python scripts/eval_topics.py --topics 3 --dry-run         # print the request, no API call
     python scripts/eval_topics.py --topics 3,5 --count-tokens  # free: count input tokens
+    python scripts/eval_topics.py --count-ceiling              # free: tokens of a maximum-length input
     python scripts/eval_topics.py --topics 3 --runs 1          # real calls (cost money)
     python scripts/eval_topics.py --topics 1-6 --runs 3
 
@@ -30,19 +31,28 @@ from app.core.analysis import (  # noqa: E402
     EFFORT,
     KIND_THREAD,
     KIND_USER_SUMMARY,
+    MAX_CHARS,
+    MAX_TOKENS,
     MODEL,
+    OUTPUT_CONFIG,
     AnalysisError,
     analyze,
     build_system_prompt,
     build_user_message,
     select_updates,
 )
+from app.storage.repository import MAX_UPDATE_LENGTHS, THREAD  # noqa: E402
 
 DEFAULT_TODAY = date(2026, 11, 24)  # "today" for the scenario tests (plan.md, decision 8)
-DEFAULT_MAX_CHARS = 250_000  # provisional: decision 9 settles it after --count-tokens
 # List prices, USD per 1M tokens (Claude Sonnet 5.5; claude-api skill cache, 2026-11-03).
 # Thinking is billed as output.
 PRICE_IN, PRICE_OUT = 2.00, 10.00
+CONTEXT_WINDOW = 1_000_000  # tokens, Claude Sonnet 5.5 (same source)
+
+# Common one-code-point emoji, for the worst case of the ceiling measurement. The app counts code
+# points (len), so each of these is one "character" of its limit.
+_EMOJI = "".join(map(chr, (0x1F600, 0x1F44D, 0x1F389, 0x1F4E6, 0x1F5BC, 0x2705, 0x1F525,
+                           0x1F64F, 0x1F4CE, 0x1F914)))
 
 KIND_BY_LABEL = {
     "התכתבות מודבקת": KIND_THREAD,
@@ -117,17 +127,22 @@ def load_topic(name):
 
 
 def parse_topics_arg(text):
-    """"3", "3,5", "1-6" or "1-3,5" -> ["topic3", ...] in order, without repeats."""
-    numbers = []
+    """"3", "3,5", "1-6", "1-3,5" or a variant such as "7b" -> ["topic3", ...] in order, without repeats."""
+    names = []
     for part in text.split(","):
-        m = re.fullmatch(r"\s*(\d+)(?:\s*-\s*(\d+))?\s*", part)
-        if not m:
-            raise ValueError(f"cannot read --topics: {text!r}")
-        low, high = int(m.group(1)), int(m.group(2) or m.group(1))
-        if low > high:
-            raise ValueError(f"cannot read --topics: {text!r}")
-        numbers.extend(n for n in range(low, high + 1) if n not in numbers)
-    return [f"topic{n}" for n in numbers]
+        variant = re.fullmatch(r"\s*(\d+[a-z])\s*", part)
+        if variant:
+            found = [variant.group(1)]
+        else:
+            m = re.fullmatch(r"\s*(\d+)(?:\s*-\s*(\d+))?\s*", part)
+            if not m:
+                raise ValueError(f"cannot read --topics: {text!r}")
+            low, high = int(m.group(1)), int(m.group(2) or m.group(1))
+            if low > high:
+                raise ValueError(f"cannot read --topics: {text!r}")
+            found = [str(n) for n in range(low, high + 1)]
+        names.extend(f"topic{n}" for n in found if f"topic{n}" not in names)
+    return names
 
 
 def to_jsonable(value):
@@ -152,6 +167,66 @@ def build_request(topic, today, max_chars, boundary):
     system = build_system_prompt(today, topic.our_side, boundary)
     message = build_user_message(topic.required_outcome, topic.deadline, selected, not_read, boundary)
     return system, message, selected, not_read
+
+
+def count_input(client, topic, today, max_chars):
+    """Count the input tokens of one analysis request (free; nothing is analysed). Numbers only."""
+    system, message, selected, not_read = build_request(topic, today, max_chars, "count000")
+    counted = client.messages.count_tokens(
+        model=MODEL, system=system, output_config=OUTPUT_CONFIG,
+        messages=[{"role": "user", "content": message}],
+    )
+    return {
+        "updates": len(selected),
+        "chars": sum(len(u.content) for u in selected),
+        "not_read": len(not_read),
+        "input_tokens": counted.input_tokens,
+    }
+
+
+def _filled(source, length):
+    """source repeated and cut to exactly this many characters."""
+    return (source * (length // len(source) + 1))[:length]
+
+
+def ceiling_topic(base, filler, max_chars):
+    """A made-up topic whose sent updates are exactly max_chars long, shaped like the app would send it.
+
+    The newest update is as long as one thread may be, an older one fills the rest of the ceiling, and an
+    even older one does not fit, so the "not read" line is part of the request too.
+    """
+    newest = min(max_chars, MAX_UPDATE_LENGTHS[THREAD])
+    sizes = [1_000, max_chars - newest, newest]
+    updates = [
+        Update(i, date(2026, 11, i), KIND_THREAD, _filled(filler, size))
+        for i, size in enumerate(sizes, start=1) if size
+    ]
+    return base._replace(name="ceiling", updates=updates)
+
+
+def measure_ceiling(client, today, max_chars):
+    """Token counts for the fixed overhead, a maximum-length Hebrew and emoji input, and topic 1.
+
+    Topic 1 is the control: its count should be close to the input tokens of a real run of it.
+    """
+    base = load_topic("topic1")
+    hebrew = "\n".join(u.content for n in range(1, 7) for u in load_topic(f"topic{n}").updates)
+    cases = [
+        ("tiny", base._replace(updates=[Update(1, date(2026, 11, 1), KIND_THREAD, "x")])),
+        ("hebrew", ceiling_topic(base, hebrew, max_chars)),
+        ("emoji", ceiling_topic(base, _EMOJI, max_chars)),
+        ("topic1", base),
+    ]
+    return {name: count_input(client, topic, today, max_chars) for name, topic in cases}
+
+
+def ceiling_line(name, row):
+    tokens = row["input_tokens"]
+    fits = "yes" if tokens + MAX_TOKENS <= CONTEXT_WINDOW else "NO"
+    return (f"{name}: {row['updates']} updates, {row['chars']} chars, not read: {row['not_read']}, "
+            f"{tokens} input tokens, input ${tokens * PRICE_IN / 1_000_000:.4f}, "
+            f"with full output ${(tokens * PRICE_IN + MAX_TOKENS * PRICE_OUT) / 1_000_000:.4f}, "
+            f"fits the context window: {fits}")
 
 
 def run_one(client, topic, today, max_chars):
@@ -196,21 +271,31 @@ def require_api_key():
         sys.exit("error: ANTHROPIC_API_KEY is not set. Put it in .env (see .env.example). No call was made.")
 
 
-def main():
+def build_parser():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--topics", required=True, help='e.g. "3", "3,5", "1-6"')
+    ap.add_argument("--topics", help='e.g. "3", "3,5", "1-6", "7b" (required except with --count-ceiling)')
     ap.add_argument("--runs", type=int, default=3)
-    ap.add_argument("--max-chars", type=int, default=DEFAULT_MAX_CHARS)
+    ap.add_argument("--max-chars", type=int, default=MAX_CHARS)
     ap.add_argument("--today", default=DEFAULT_TODAY.strftime("%d.%m.%Y"), help="dd.mm.yyyy")
     mode = ap.add_mutually_exclusive_group()
     mode.add_argument("--dry-run", action="store_true", help="print the request, no API call")
     mode.add_argument("--count-tokens", action="store_true", help="count input tokens (free), no analysis")
+    mode.add_argument("--count-ceiling", action="store_true",
+                      help="count tokens of a made-up input at the length ceiling (free), no analysis")
+    return ap
+
+
+def main():
+    ap = build_parser()
     args = ap.parse_args()
+    if not args.topics and not args.count_ceiling:
+        ap.error("--topics is required")
     sys.stdout.reconfigure(encoding="utf-8")  # the Windows console is cp1255; updates contain emoji
 
     try:
         today = _parse_date(args.today, "--today")
-        topics = [load_topic(name) for name in parse_topics_arg(args.topics)]
+        names = [] if args.count_ceiling else parse_topics_arg(args.topics)
+        topics = [load_topic(name) for name in names]
     except ValueError as e:
         sys.exit(f"error: {e}")
 
@@ -231,19 +316,24 @@ def main():
 
     client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment; never printed
 
+    if args.count_ceiling:
+        try:
+            rows = measure_ceiling(client, today, args.max_chars)
+        except anthropic.APIError as e:
+            sys.exit(f"error: API error {type(e).__name__}: {e}")
+        for name, row in rows.items():
+            print(ceiling_line(name, row))
+        return
+
     if args.count_tokens:
         for topic in topics:
             try:
-                system, message, selected, not_read = build_request(topic, today, args.max_chars, "count")
+                row = count_input(client, topic, today, args.max_chars)
             except ValueError as e:
                 sys.exit(f"error: {topic.name}: {e}")
-            counted = client.messages.count_tokens(
-                model=MODEL, system=system, messages=[{"role": "user", "content": message}]
-            )
-            chars = sum(len(u.content) for u in selected)
-            print(f"{topic.name}: {len(selected)} updates, {chars} chars of updates, "
-                  f"{counted.input_tokens} input tokens (prompt and schema overhead included except "
-                  f"the output schema), not read: {len(not_read)}")
+            print(f"{topic.name}: {row['updates']} updates, {row['chars']} chars of updates, "
+                  f"{row['input_tokens']} input tokens (prompt and output schema included), "
+                  f"not read: {row['not_read']}")
         return
 
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
