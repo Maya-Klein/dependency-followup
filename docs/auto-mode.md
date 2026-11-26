@@ -16,7 +16,7 @@
 | לא עורכים את `scripts/topic7/` | נושא הבחינה של ההערכה, נעול | settings deny (`Edit`) |
 | אין `git push` בכוח (בכל צורה) | דורס היסטוריה ב-GitHub | settings deny, וגם hook גלובלי: `block_dangerous.py` |
 | אין `git reset --hard` | מוחק עבודה שלא נשמרה | settings deny, וגם hook גלובלי: `block_dangerous.py` |
-| `git push` | סוף PR: עוצרים ומחכים ל"המשך" | settings ask, ו-`CLAUDE.md` |
+| `git push` | סוף PR: עוצרים ומחכים ל"המשך". ב-PR שמשנה קוד, לפני כן Claude מבקש מהמשתמשת להקליד `/security-review`, ולא מריץ סקירה במקומה (כלל 25) | settings ask ל-`git push`, ו-`CLAUDE.md`. הבקשה להקליד את הפקודה נמצאת ב-`CLAUDE.md` בלבד |
 | `gh pr merge` | מיזוג רק באישור מפורש (כלל 21) | settings ask, ו-`CLAUDE.md` |
 | הרצה של `eval_topics.py` | קורא ל-API ועולה כסף | settings ask |
 | פקודות `railway` | משנות את האתר הפרוס, ויכולות לעלות כסף | settings ask |
