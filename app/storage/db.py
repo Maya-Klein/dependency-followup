@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, MetaData, Table, Text, create_engine, event
+from sqlalchemy import JSON, Column, Date, DateTime, ForeignKey, Integer, MetaData, Table, Text, create_engine, event
 from sqlalchemy.engine import make_url
 
 DEFAULT_DATABASE_URL = "sqlite:///data/app.db"
@@ -27,6 +27,21 @@ updates = Table(
     Column("content", Text, nullable=False),
     Column("entry_date", Date, nullable=False),
     Column("created_at", DateTime, nullable=False),
+)
+
+# Every successful run is kept. update_ids, required_outcome and due_date record what it was run against.
+analyses = Table(
+    "analyses",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("topic_id", Integer, ForeignKey("topics.id", ondelete="CASCADE"), nullable=False, index=True),
+    Column("created_at", DateTime, nullable=False),
+    Column("result", JSON, nullable=False),
+    Column("meta", JSON, nullable=False),
+    Column("our_side", Text, nullable=False),
+    Column("update_ids", JSON, nullable=False),
+    Column("required_outcome", Text, nullable=False),
+    Column("due_date", Date, nullable=False),
 )
 
 

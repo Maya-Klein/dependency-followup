@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import delete, insert, select, update
 
-from app.storage.db import topics, updates
+from app.storage.db import analyses, topics, updates
 
 
 MAX_TITLE_LENGTH = 200
@@ -134,9 +134,47 @@ def get_update(engine, update_id):
 
 
 def delete_update(engine, update_id):
-    """Only for an update entered by mistake; there is no edit. Returns False if it does not exist."""
+    """Only for an update entered by mistake; there is no edit. Returns False if it does not exist.
+
+    All of the topic's analyses are deleted with it: they may quote the deleted text.
+    """
     if update_id > MAX_ID:
         return False
+    topic_of_update = select(updates.c.topic_id).where(updates.c.id == update_id).scalar_subquery()
     with engine.begin() as conn:
+        conn.execute(delete(analyses).where(analyses.c.topic_id == topic_of_update))
         result = conn.execute(delete(updates).where(updates.c.id == update_id))
     return result.rowcount > 0
+
+
+def add_analysis(engine, topic_id, result, meta, our_side, update_ids, required_outcome, due_date):
+    """result and meta must be JSON-serialisable (dates as strings)."""
+    with engine.begin() as conn:
+        inserted = conn.execute(
+            insert(analyses).values(
+                topic_id=topic_id,
+                created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+                result=result,
+                meta=meta,
+                our_side=our_side,
+                update_ids=list(update_ids),
+                required_outcome=required_outcome,
+                due_date=due_date,
+            )
+        )
+    return inserted.inserted_primary_key[0]
+
+
+def latest_analysis(engine, topic_id):
+    """The newest analysis of the topic, or None."""
+    if topic_id > MAX_ID:
+        return None
+    stmt = (
+        select(analyses)
+        .where(analyses.c.topic_id == topic_id)
+        .order_by(analyses.c.created_at.desc(), analyses.c.id.desc())
+        .limit(1)
+    )
+    with engine.connect() as conn:
+        row = conn.execute(stmt).mappings().first()
+    return dict(row) if row else None
