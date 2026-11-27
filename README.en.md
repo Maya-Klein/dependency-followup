@@ -133,7 +133,7 @@ The project is built in small stages, following the plan in [`docs/plan.md`](doc
 6. Connecting the analysis to the topic page and saving the analyses.
 7. Deployment to a server (Railway), with a password and sample data.
 8. Open/closed status and a milestone.
-9. A set of scenarios to load into the app (`seed.py`), and an overall check.
+9. A set of scenarios to load into the app (`scripts/seed.py`), and an overall check.
 10. An accessibility check.
 
 ## Installation
