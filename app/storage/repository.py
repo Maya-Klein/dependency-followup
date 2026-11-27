@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, func, insert, literal, select, update
 
-from app.storage.db import analyses, topics, updates
+from app.storage.db import analyses, analysis_calls, topics, updates
 
 
 MAX_TITLE_LENGTH = 200
@@ -178,3 +178,24 @@ def latest_analysis(engine, topic_id):
     with engine.connect() as conn:
         row = conn.execute(stmt).mappings().first()
     return dict(row) if row else None
+
+
+def reserve_analysis_call(engine, topic_id, day, limit):
+    """Record one API call for `day` unless `limit` calls were already recorded. Returns False if full.
+
+    Call it before the API call. `day` is the date in Israel.
+
+    The count and the insert are one statement on purpose: SQLite takes the write lock before the
+    statement reads, so a second request waits and then counts the first one's row. Splitting it
+    into a SELECT and an INSERT would let both pass. This is SQLite only: on Postgres (READ
+    COMMITTED) it would need an explicit lock.
+    """
+    used = select(func.count()).select_from(analysis_calls).where(analysis_calls.c.call_date == day)
+    row = select(
+        literal(day, analysis_calls.c.call_date.type),
+        literal(topic_id, analysis_calls.c.topic_id.type),
+        literal(datetime.now(timezone.utc).replace(tzinfo=None), analysis_calls.c.created_at.type),
+    ).where(used.scalar_subquery() < limit)
+    with engine.begin() as conn:
+        result = conn.execute(insert(analysis_calls).from_select(["call_date", "topic_id", "created_at"], row))
+    return result.rowcount == 1

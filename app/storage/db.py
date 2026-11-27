@@ -44,6 +44,17 @@ analyses = Table(
     Column("due_date", Date, nullable=False),
 )
 
+# One row per API call, for the daily quota. No foreign key on topic_id: deleting a topic
+# must not give quota back.
+analysis_calls = Table(
+    "analysis_calls",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("call_date", Date, nullable=False, index=True),
+    Column("topic_id", Integer, nullable=False),
+    Column("created_at", DateTime, nullable=False),
+)
+
 
 def get_engine(url=DEFAULT_DATABASE_URL):
     parsed = make_url(url)
